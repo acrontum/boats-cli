@@ -1,0 +1,28 @@
+{
+  "name": "spec",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf .boatsrc src build",
+    "test": "boats-cli $(node -p \"require('./package.json').testdata.join(' ')\")",
+    "build": "NODE_ENV=test boats --yes -i ./src/index.yml -o ./build/api.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@acrontum/boats-cli": "file:../../acrontum-boats-cli-1.0.0.tgz",
+    "boats": "^4.11.1"
+  },
+  "testdata": [
+    "init",
+    "path /users/:userId/photo-albums/:albumId -crudl",
+    "path /health --get",
+    "model -crudlU --name path",
+    "model test --list --get --delete --patch --put --patch",
+    "model search --type query",
+    "model X-Client-Version --type header",
+    "model jwt"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@acrontum/boats-cli",
+  "version": "0.1.2",
+  "description": "A CLI that generates boats projects, paths, schemas and queries",
+  "main": "dist/cli.js",
+  "directories": {
+    "test": "test"
+  },
+  "bin": {
+    "boats-cli": "dist/cli.js",
+    "bc": "dist/cli.js"
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist/*",
+    "build": "tsc",
+    "lint": "prettier --write 'src/'",
+    "test": " node dist/cli.js path /users/:userId/photo-albums/:albumId -crudl model search --type query model jwt --dry-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.12.7",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "files": [
+    "readme.md",
+    "dist/**/*.js",
+    "dist/**/*.ts"
+  ]
+}

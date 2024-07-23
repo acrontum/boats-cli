@@ -1,0 +1,21 @@
+{
+  /* https://github.com/tsconfig/bases/blob/main/bases/node20.json */
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "NodeNext",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "removeComments": false,
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "strictNullChecks": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
