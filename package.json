@@ -1,11 +1,9 @@
 {
   "name": "@acrontum/boats-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A CLI that generates boats projects, paths, schemas and queries",
   "main": "dist/cli.js",
-  "directories": {
-    "test": "test"
-  },
+  "repository": "https://github.com/acrontum/boats-cli",
   "bin": {
     "boats-cli": "dist/cli.js",
     "bc": "dist/cli.js"
@@ -13,7 +11,12 @@
   "scripts": {
     "prebuild": "rm -rf dist/*",
     "build": "tsc",
-    "lint": "prettier --write 'src/'"
+    "lint": "prettier --write 'src/'",
+    "version": "npm verison --no-commit-hooks --no-git-tag-version",
+    "setup": "git config core.hooksPath ./githooks",
+    "docs": "npm run docs-readme && npm run docs-changelog",
+    "docs-readme": "npx doctoc --github readme.md && sed -i 's/%5C_/_/g' readme.md",
+    "docs-changelog": "npx auto-changelog --output changelog.md --commit-limit false --sort-commits date --hide-empty-releases --ignore-commit-pattern 'release' --breaking-pattern 'breaking change: '"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +24,7 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.12.7",
+    "auto-changelog": "^2.4.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },
