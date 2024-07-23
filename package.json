@@ -13,8 +13,7 @@
   "scripts": {
     "prebuild": "rm -rf dist/*",
     "build": "tsc",
-    "lint": "prettier --write 'src/'",
-    "test": " node dist/cli.js path /users/:userId/photo-albums/:albumId -crudl model search --type query model jwt --dry-run"
+    "lint": "prettier --write 'src/'"
   },
   "keywords": [],
   "author": "",
