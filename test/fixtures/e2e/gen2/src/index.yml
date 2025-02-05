@@ -1,0 +1,34 @@
+openapi: "3.1.0"
+info:
+  version: "{{ packageJson('version') }}"
+  title: "{{ packageJson('name') }}"
+  description: "our sweet api"
+  contact:
+    name: "acrontum"
+    email: "support@acrontum.de"
+  license:
+    name: "Apache 2.0"
+    url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+servers:
+  - url: "/v1"
+paths:
+  $ref: "paths/index.yml"
+components:
+  parameters:
+    $ref: "components/parameters/index.yml"
+  schemas:
+    $ref: "components/schemas/index.yml"
+
+{{
+  inject([
+    {
+      toAllOperations: {
+        content: "
+          tags:
+            - {{ autoTag() }}
+          operationId: {{ uniqueOpId() }}
+        "
+      }
+    }
+  ])
+}}

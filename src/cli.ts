@@ -1,26 +1,41 @@
 #!/usr/bin/env node
 
+import { mkdir } from 'node:fs/promises';
+import { relative } from 'node:path';
 import { parseArgs, ParseArgsConfig } from 'node:util';
-import { generate, GenerationTask } from './generate';
-import { getBoatsRc, getIndex } from './generators/scaffold';
+import { generate, GenerationTask, logger } from './generate';
 import { argname, description } from './lib';
+import { parseInitCommand } from './subcommands/init';
 import { modelCliArguments, parseModelCommand } from './subcommands/model';
 import { parsePathCommand, pathCliArguments } from './subcommands/path';
+import { getBoatsRc, getIndex } from './templates/init';
 
 export type ParseArgsOptionConfig = NonNullable<ParseArgsConfig['options']>[string];
 export type CliArg = ParseArgsOptionConfig & { [description]: string; [argname]?: string };
-export type GlobalOptions = { 'dry-run'?: boolean; force?: boolean };
-export type SubcommandGenerator = (args: string[], options?: GlobalOptions) => GenerationTask[];
-
-const parseInitCommand: SubcommandGenerator = (args: string[]) => {
-  if (args.find((arg) => arg === '-h' || arg === '--help')) {
-    console.log('npx bc init creates a .boatsrc and src/index.yml files.');
-    console.log('Both files are also created when other commands are run as they are necessary for boats build.');
-    process.exit(1);
-  }
-
-  return [];
+export type GlobalOptions = {
+  'dry-run'?: boolean;
+  force?: boolean;
+  'no-index'?: boolean;
+  'no-init'?: boolean;
+  output?: string;
+  quiet?: boolean;
+  verbose?: boolean;
 };
+export type SubcommandGenerator = (args: string[], options?: GlobalOptions) => GenerationTask[] | null;
+
+/**
+ * Custom error to immediately exit on errors.
+ * Will trigger process.exit when called from the CLI, but can be
+ * tested for when running programmatically.
+ */
+export class CliExit extends Error {
+  code: number = 0;
+
+  constructor(code: number) {
+    super();
+    this.code = code;
+  }
+}
 
 const subcommands: Record<string, SubcommandGenerator> = {
   path: parsePathCommand,
@@ -28,15 +43,21 @@ const subcommands: Record<string, SubcommandGenerator> = {
   init: parseInitCommand,
 };
 
-const cliArguments: Record<string, CliArg> = {
+export const cliArguments: Record<string, CliArg> = {
   'dry-run': { type: 'boolean', short: 'd', [description]: 'Print the changes to be made' },
   force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
+  init: { type: 'boolean', short: 'i', [description]: 'Create folder structure and base files' },
+  'no-index': { type: 'boolean', short: 'n', [description]: 'Skip auto-creating index files, only models' },
+  'no-init': { type: 'boolean', short: 'n', [description]: 'Skip auto-creating init files' },
+  output: { type: 'string', short: 'o', [description]: 'Location to output files to (defaults to current folder)' },
+  quiet: { type: 'boolean', short: 'q', [description]: 'Only output errors' },
+  verbose: { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
   help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
 };
 
 export const buildHelpFromOpts = (opts: Record<string, CliArg>): string => {
   let longest = 0;
-  const longOpts = (Object.keys(opts) as (keyof typeof cliArguments)[]).sort();
+  const longOpts = Object.keys(opts).sort();
   const options: string[][] = [];
 
   for (const longOpt of longOpts) {
@@ -62,19 +83,20 @@ export const buildHelpFromOpts = (opts: Record<string, CliArg>): string => {
 };
 
 const help = (exitCode: number | null = null, message?: string): null => {
-  (exitCode === 0 ? console.log : console.error)(`${message ? message + '\n\n' : ''}\
-\x1b[0;0mGenerates boilerplate boats files.
+  (exitCode === 0 ? logger.console.log.bind(logger.console) : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
+Generates boilerplate BOATS files.
 
 Usage:
-  npx bc <subcommand> <name> [options]
+  npx bc SUBCOMMAND [OPTIONS] [...SUBCOMMAND [OPTIONS]]
 
 Global options:
 ${buildHelpFromOpts(cliArguments)}
-Use 'npx bc <subcommand> --help' for details about subcommands.
+Use 'npx bc SUBCOMMAND --help' for details about subcommands.
 
 Subcommands:
-  path PATH OPTION [options]
-  model SINGULAR_NAME [options]
+  path PATH METHOD_OPTION [...OPTIONS]
+  model SINGULAR_NAME [...OPTIONS]
+  init [-a]
 
 Examples:
   npx bc path users/:id --list --get --delete --patch --put
@@ -89,7 +111,7 @@ Examples:
 `);
 
   if (typeof exitCode === 'number') {
-    process.exit(exitCode);
+    throw new CliExit(exitCode);
   }
 
   return null;
@@ -109,26 +131,30 @@ export const parseCliArgs = (
       return help(1, message);
     }
 
-    console.error(e);
+    logger.console.error(e);
 
     return null;
   }
 };
 
-const cli = async () => {
+export const cli = async (args: string[]): Promise<Record<string, GenerationTask>> => {
   const processed = parseCliArgs(
     {
       options: { ...modelCliArguments, ...pathCliArguments, ...cliArguments },
       tokens: true,
       allowPositionals: true,
       strict: false,
+      args,
     },
     help,
   );
 
   if (!processed?.tokens?.length) {
-    console.error('error: missing arguments\n');
-    return help(1);
+    logger.console.error('error: missing arguments\n');
+
+    help(1);
+
+    return {};
   }
 
   const globalOptions: GlobalOptions = {};
@@ -143,20 +169,38 @@ const cli = async () => {
       case 'option':
         if (arg.name === 'help') {
           if (!hasSubCommand) {
-            return help(0);
+            help(0);
+
+            return {};
           } else {
             subcommand.push(arg.rawName);
           }
         }
 
         if (arg.name in cliArguments) {
-          globalOptions[arg.name as keyof typeof globalOptions] = true;
+          if (arg.name === 'output') {
+            if (!arg.value) {
+              help(1, `Parameter '--${arg.name}' requires a value`);
+
+              return {};
+            }
+            globalOptions.output = arg.value[0] === '/' ? arg.value : relative('.', arg.value);
+          } else {
+            globalOptions[arg.name as Exclude<keyof typeof globalOptions, 'output'>] = true;
+          }
+
+          if (arg.name === 'verbose') {
+            globalOptions.quiet = false;
+          } else if (arg.name === 'quiet') {
+            globalOptions.verbose = false;
+          }
           continue;
         }
         if (!subcommand.length) {
-          console.error(`Unknown option '${arg.rawName}'.\n`);
+          logger.console.error(`Unknown option '${arg.rawName}'.\n`);
+          help(1);
 
-          return help(1);
+          return {};
         }
 
         subcommand.push(arg.rawName);
@@ -172,9 +216,10 @@ const cli = async () => {
           }
           subcommand.length = 0;
         } else if (!subcommand.length) {
-          console.error(`Unknown subcommand '${arg.value}'.\n`);
+          logger.console.error(`Unknown subcommand '${arg.value}'.\n`);
+          help(1);
 
-          return help(1);
+          return {};
         }
         subcommand.push(arg.value);
         break;
@@ -187,24 +232,59 @@ const cli = async () => {
     }
   }
 
+  if (process.env.VERBOSE) {
+    globalOptions.verbose = true;
+    globalOptions.quiet = false;
+  }
+
   if (subcommand.length) {
     todo.push(subcommand);
   }
 
   const tasks: GenerationTask[] = [];
   for (const [subcommand, ...args] of todo) {
-    tasks.push(...subcommands[subcommand](args, globalOptions));
+    const subcommandTasks = subcommands[subcommand](args, globalOptions);
+    if (subcommandTasks?.length) {
+      tasks.push(...subcommandTasks);
+    }
   }
-  tasks.push({ contents: getIndex, filename: 'src/index.yml' }, { contents: getBoatsRc, filename: '.boatsrc' });
 
-  await generate(tasks, globalOptions);
+  if (!globalOptions['no-init']) {
+    tasks.push({ contents: getIndex, filename: 'src/index.yml' }, { contents: getBoatsRc, filename: '.boatsrc' });
+  }
+
+  if (!tasks.length) {
+    help(1, 'Nothing to do');
+
+    return {};
+  }
+
+  if (globalOptions.output && !globalOptions['dry-run']) {
+    try {
+      await mkdir(globalOptions.output, { recursive: true });
+    } catch (e) {
+      let message = `Invalid '--output' path.`;
+      if (e instanceof Error) {
+        message += ` ${e.message}`;
+      }
+
+      help(1, message);
+
+      return {};
+    }
+  }
+
+  return await generate(tasks, globalOptions);
 };
 
 if (require.main === module) {
-  cli()
+  cli(process.argv.slice(2))
     .then(() => process.exit(0))
-    .catch((e) => {
-      console.trace(e);
+    .catch((e: unknown) => {
+      if (e instanceof CliExit) {
+        process.exit(e.code);
+      }
+      logger.console.trace(e);
       process.exit(1);
     });
 }

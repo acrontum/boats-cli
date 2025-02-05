@@ -1,0 +1,10 @@
+summary: "Show verify"
+responses:
+  "404":
+    description: "verify not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Verify"

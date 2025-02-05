@@ -1,0 +1,12 @@
+summary: "Show album"
+parameters:
+  - $ref: "#/components/parameters/PathAlbumId"
+responses:
+  "404":
+    description: "album not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Album"

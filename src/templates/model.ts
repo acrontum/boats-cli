@@ -1,6 +1,6 @@
 import { toYaml } from '../lib';
 
-export const getComponentIndex = (trim = "'Model'"): string => `{{ autoComponentIndexer(${trim}) }}`;
+export const getComponentIndex = (trim = "'Model'"): string => `{{ autoComponentIndexer(${trim}) }}\n`;
 
 export const getModel = (): string => {
   return toYaml({
@@ -19,7 +19,7 @@ export const getModel = (): string => {
   });
 };
 
-export const getModels = (paginationSchema: string = '#/components/schemas/Pagination') => {
+export const getModels = (paginationSchema: string = '#/components/schemas/Pagination'): string => {
   return toYaml({
     type: 'object',
     required: ['meta', 'data'],
@@ -33,17 +33,17 @@ export const getModels = (paginationSchema: string = '#/components/schemas/Pagin
   });
 };
 
-export const getParam = (name: string, paramIn: 'header' | 'path' | 'query', format?: string, required?: boolean) => {
+export const getParam = (name: string, paramIn: 'header' | 'path' | 'query', type: string = 'string'): string => {
   return toYaml({
     in: paramIn,
     name,
-    required: typeof required !== 'undefined' ? required : paramIn === 'path',
-    schema: { type: 'string', ...(format ? { format } : {}) },
+    required: paramIn === 'path',
+    schema: { type },
     description: `${paramIn} param that does some stuff`,
   });
 };
 
-export const getPaginationModel = () => {
+export const getPaginationModel = (): string => {
   return toYaml({
     type: 'object',
     required: ['offset', 'limit', 'total'],

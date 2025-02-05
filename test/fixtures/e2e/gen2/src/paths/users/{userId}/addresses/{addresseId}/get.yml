@@ -1,0 +1,13 @@
+summary: "Show address"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "#/components/parameters/PathAddresseId"
+responses:
+  "404":
+    description: "address not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Address"

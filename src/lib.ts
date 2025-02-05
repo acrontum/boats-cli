@@ -1,8 +1,9 @@
-import { access, writeFile, mkdir as fsmkdir, stat } from 'node:fs/promises';
+import { access, mkdir as fsmkdir, writeFile } from 'node:fs/promises';
 
-export interface JsonArray extends Array<string | number | boolean | Json | JsonArray> {}
+/* eslint-disable-next-line @typescript-eslint/no-empty-object-type */
+export interface JsonArray extends Array<string | number | boolean | Json | JsonArray | null> {}
 export interface Json {
-  [x: string]: string | number | boolean | Json | JsonArray;
+  [x: string]: string | number | boolean | Json | JsonArray | null;
 }
 
 const endings: Record<string, string> = {
@@ -25,13 +26,14 @@ export const capitalize = (s: string): string => `${s[0].toUpperCase()}${s.slice
 
 // https://github.com/typeorm/typeorm/blob/master/src/util/StringUtils.ts
 export const camelCase = (str: string, firstCapital: boolean = false): string => {
-  return (firstCapital ? ' ' + str : str).replace(/^([A-Z])|[\s-_](\w)/g, (_, p1, p2) => p2?.toUpperCase() || p1.toLowerCase());
+  return (firstCapital ? ' ' + str : str).replace(/^([A-Z])|[\s-_](\w)/g, (_, p1: string, p2?: string) => p2?.toUpperCase() || p1.toLowerCase());
 };
 
 export const dashCase = (str: string): string => {
   return str
     .replace(/([A-Z])([A-Z])([a-z])/g, '$1-$2$3')
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/ +/g, '-')
     .toLowerCase();
 };
 
@@ -40,7 +42,7 @@ export const exists = (path: string): Promise<boolean> =>
     .then(() => true)
     .catch(() => false);
 
-export const mkdir = async (path: string): Promise<string> => fsmkdir(path, { recursive: true });
+export const mkdir = async (path: string): Promise<string | undefined> => fsmkdir(path, { recursive: true });
 
 export const createFile = async (path: string, content: string, force = false): Promise<boolean> => {
   if (!force && (await exists(path))) {
@@ -52,9 +54,13 @@ export const createFile = async (path: string, content: string, force = false): 
   return true;
 };
 
-export const toYaml = (object: Json): string => {
+export const toYaml = (object: Json, trailingNewline = true): string => {
   const out: string[] = [];
   toYamlRecurse(object, out, 0);
+
+  if (trailingNewline) {
+    out.push('');
+  }
 
   return out.join('\n');
 };
@@ -63,7 +69,7 @@ const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, is
   const prevIndent = depth ? ' '.repeat((depth - 1) * 2) : '';
 
   if (typeof object === 'object' && object !== null) {
-    const keys = Object.keys(object) as (keyof object)[];
+    const keys = Object.keys(object);
     let first = true;
     for (const key of keys) {
       if (isArray && first) {
@@ -72,7 +78,7 @@ const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, is
       } else {
         out.push(`${' '.repeat(depth * 2)}${key}:`);
       }
-      toYamlRecurse(object[key], out, depth + 1, Array.isArray(object));
+      toYamlRecurse((object as Json)[key], out, depth + 1, Array.isArray(object));
     }
     return;
   }
@@ -82,8 +88,55 @@ const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, is
   }
 
   if (isArray) {
-    out[out.length - 1] = `${prevIndent}- ${object}`;
+    out[out.length - 1] = `${prevIndent}- ${object as string}`;
   } else {
-    out[out.length - 1] += ` ${object}`;
+    out[out.length - 1] += ` ${object as string}`;
   }
+};
+
+/**
+ * trim leading index from inline template string
+ *
+ * example
+ *  console.log(`\
+ *    insert into auth.users
+ *      (id, name)
+ *    values
+ *      (123, pat)`);
+ *
+ * would log
+ * |  insert into auth.users
+ * |    (id, name)
+ * |  values
+ * |    (pat, rules)"
+ *
+ * whereas
+ *  const sql = trimIndent`\
+ *    insert into auth.users
+ *      (id, name)
+ *    values
+ *      (123, pat)`;
+ *
+ * would log
+ * |insert into auth.users
+ * |  (id, name)
+ * |values
+ * |  (pat, rules)
+ */
+export const trimIndent = (strings: TemplateStringsArray, ...replacements: string[]): string => {
+  const indent = strings[0].match(/^\n*([ ]+)/)?.[1];
+  const lastIndent = (indent || '').replace('  ', '');
+  const re = new RegExp(`^${indent || ''}`, '');
+  const reLast = new RegExp(`^(${indent || ''}|${lastIndent})`, '');
+
+  let result = '';
+  for (let i = 0; i < strings.length; ++i) {
+    const tpl = strings[i]
+      .split('\n')
+      .map((string) => string.replace(i === strings.length - 1 ? reLast : re, ''))
+      .join('\n');
+    result += `${tpl}${replacements[i] ?? ''}`;
+  }
+
+  return result;
 };

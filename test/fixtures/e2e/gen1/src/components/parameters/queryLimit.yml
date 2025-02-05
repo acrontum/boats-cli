@@ -1,0 +1,6 @@
+in: "query"
+name: "limit"
+required: false
+schema:
+  type: "number"
+description: "query param that does some stuff"

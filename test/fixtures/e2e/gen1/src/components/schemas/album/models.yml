@@ -1,0 +1,11 @@
+type: "object"
+required:
+  - "meta"
+  - "data"
+properties:
+  meta:
+    $ref: "#/components/schemas/Pagination"
+  data:
+    type: "array"
+    items:
+      $ref: "./model.yml"

@@ -1,0 +1,9 @@
+summary: "List albums"
+description: "List albums"
+responses:
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Albums"

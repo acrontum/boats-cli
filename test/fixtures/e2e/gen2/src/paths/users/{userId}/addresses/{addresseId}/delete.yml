@@ -1,0 +1,9 @@
+summary: "Delete address"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "#/components/parameters/PathAddresseId"
+responses:
+  "404":
+    description: "address not found"
+  "204":
+    description: "Deleted"

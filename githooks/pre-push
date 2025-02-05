@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# fail if anything errors (including pipes)
+set -e
+set -o pipefail
+
+# cd to script folder then up 1 dir
+cd "$(cd $(dirname $0) && pwd)/.."
+
+# lint or fail
+npm run lint
+
+# must built
+npm run build
+
+# tests must pass
+npm test
+
+echo -e '\033[32;1mpassed\033[0;0m'

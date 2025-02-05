@@ -1,0 +1,18 @@
+type: "object"
+required:
+  - "offset"
+  - "limit"
+  - "total"
+properties:
+  offset:
+    type: "number"
+    minimum: 0
+    description: "Starting index"
+  limit:
+    type: "number"
+    minimum: 0
+    description: "Max items returned"
+  total:
+    type: "number"
+    minimum: 0
+    description: "Total items available"

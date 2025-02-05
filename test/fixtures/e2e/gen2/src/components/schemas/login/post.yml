@@ -1,0 +1,11 @@
+type: "object"
+required:
+  - "name"
+properties:
+  name:
+    type: "string"
+    description: "Name of the thing, separated by dashes (-)"
+    example: "this-is-an-example"
+    minLength: 1
+    pattern: "\\S"
+    nullable: true

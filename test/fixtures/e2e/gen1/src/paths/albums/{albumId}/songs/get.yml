@@ -1,0 +1,11 @@
+summary: "List songs"
+description: "List songs"
+parameters:
+  - $ref: "#/components/parameters/PathAlbumId"
+responses:
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Songs"

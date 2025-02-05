@@ -1,0 +1,8 @@
+summary: "Delete user"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+responses:
+  "404":
+    description: "user not found"
+  "204":
+    description: "Deleted"
