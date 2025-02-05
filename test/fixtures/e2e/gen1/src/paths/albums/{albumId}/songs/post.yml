@@ -1,0 +1,18 @@
+summary: "Create a song"
+parameters:
+  - $ref: "#/components/parameters/PathAlbumId"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/SongPost"
+responses:
+  "422":
+    description: "Invalid song supplied"
+  "201":
+    description: "Created"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Song"

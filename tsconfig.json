@@ -1,6 +1,6 @@
 {
-  /* https://github.com/tsconfig/bases/blob/main/bases/node20.json */
-  "extends": "@tsconfig/node20/tsconfig.json",
+  /* https://github.com/tsconfig/bases/blob/main/bases/node22.json */
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
     "target": "ES6",
     "module": "NodeNext",
@@ -11,11 +11,10 @@
     "outDir": "./dist",
     "removeComments": false,
     "resolveJsonModule": true,
-    "rootDir": "./src",
-    "baseUrl": "./src",
+    "rootDir": "./",
     "sourceMap": true,
-    "strictNullChecks": false
+    "strictNullChecks": true
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["node_modules"]
 }

@@ -1,0 +1,18 @@
+summary: "Create a address"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/AddressPost"
+responses:
+  "422":
+    description: "Invalid address supplied"
+  "201":
+    description: "Created"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Address"

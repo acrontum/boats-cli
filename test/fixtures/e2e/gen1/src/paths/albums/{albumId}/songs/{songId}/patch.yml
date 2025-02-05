@@ -1,0 +1,21 @@
+summary: "Update song"
+parameters:
+  - $ref: "#/components/parameters/PathAlbumId"
+  - $ref: "#/components/parameters/PathSongId"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/SongPatch"
+responses:
+  "404":
+    description: "song not found"
+  "422":
+    description: "Invalid song supplied"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Song"

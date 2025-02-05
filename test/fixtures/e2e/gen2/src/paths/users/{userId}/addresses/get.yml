@@ -1,0 +1,11 @@
+summary: "List addresses"
+description: "List addresses"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+responses:
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Addresses"

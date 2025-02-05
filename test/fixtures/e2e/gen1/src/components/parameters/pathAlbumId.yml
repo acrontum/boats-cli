@@ -1,0 +1,6 @@
+in: "path"
+name: "albumId"
+required: true
+schema:
+  type: "string"
+description: "path param that does some stuff"

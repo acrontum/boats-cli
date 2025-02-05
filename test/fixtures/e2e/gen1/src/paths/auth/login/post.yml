@@ -1,0 +1,16 @@
+summary: "Create a login"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/LoginPost"
+responses:
+  "422":
+    description: "Invalid login supplied"
+  "201":
+    description: "Created"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Login"

@@ -1,0 +1,13 @@
+summary: "Show song"
+parameters:
+  - $ref: "#/components/parameters/PathAlbumId"
+  - $ref: "#/components/parameters/PathSongId"
+responses:
+  "404":
+    description: "song not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/Song"

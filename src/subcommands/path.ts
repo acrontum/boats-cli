@@ -1,7 +1,7 @@
-import { CliArg, SubcommandGenerator, buildHelpFromOpts, parseCliArgs } from '../cli';
-import { GenerationTask } from '../generate';
-import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '../generators/method';
-import { getModel, getModels, getPaginationModel, getParam } from '../generators/model';
+import { CliArg, CliExit, SubcommandGenerator, buildHelpFromOpts, parseCliArgs } from '../cli';
+import { GenerationTask, logger } from '../generate';
+import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '../templates/path';
+import { getModel, getModels, getPaginationModel, getParam } from '../templates/model';
 import { argname, camelCase, capitalize, dashCase, description, singular } from '../lib';
 
 export const pathCliArguments: Record<string, CliArg> = {
@@ -17,51 +17,66 @@ export const pathCliArguments: Record<string, CliArg> = {
     type: 'string',
     [argname]: 'DASH_NAME',
     short: 'M',
-    [description]: 'Custom path model name (eg "path /search/users --model=user-search")',
+    [description]: "Custom path model name (eg 'path /search/users --model=user-search')",
   },
   help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
 };
 
 const help = (exitCode: number | null = null, message?: string): null => {
-  (exitCode === 0 ? console.log : console.error)(`${message ? message + '\n\n' : ''}\
-\x1b[0;0mUsage:
-  npx bc path PATH CRUD [...CRUD] [...options]
+  (exitCode === 0 ? logger.console.info.bind(logger.console) : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
+Generates BOATS path / method files (and model files by default).
+
+Usage:
+  npx bc path PATH_NAME METHOD [...OPTIONS | METHOD]
 
 Options:
 ${buildHelpFromOpts(pathCliArguments)}
 
+Methods:
+    list, get, delete, patch, put, post
+
 Examples:
   npx bc path users/:id --post --get --patch
-  npx bc path users/ --post --list
+  npx bc path /users --post --list
+  npx bc path 'users/:userId/albums/:albumId' --post --list --no-models
 
   Running:
-    'npx bc path users/:id --list --get --delete --patch --put'
+    npx bc path users/:id --list --get --delete --patch --put
     or
-    'npx bc path users/{id} -lsdur'
+    npx bc path users/{id} -crudl
 
   Will create:
+    scaffolding:
+      .boatsrc
+      src/index.yml
+      src/components/schemas/index.yml
+      src/components/parameters/index.yml
     paths:
-      users/get.yml
-      users/post.yml
-      users/:id/get.yml
-      users/:id/delete.yml
-      users/:id/patch.yml
-      users/:id/put.yml
+      src/paths/index.yml
+      src/paths/users/get.yml
+      src/paths/users/{id}/delete.yml
+      src/paths/users/{id}/get.yml
+      src/paths/users/{id}/patch.yml
+      src/paths/users/{id}/put.yml
     models:
-      schemas/user/models.yml (list)
-      schemas/user/model.yml (show)
-      schemas/user/patch.yml (update)
-      schemas/user/post.yml (create)
-      schemas/user/put.yml (create or replace)
+      src/components/schemas/pagination/model.yml
+      src/components/schemas/user/model.yml
+      src/components/schemas/user/models.yml
+      src/components/schemas/user/patch.yml
+      src/components/schemas/user/put.yml
     parameters:
-      parameters/pathId.yml
-    query params:
-      parameters/queryLimit.yml
-      parameters/queryOffset.yml
+      src/components/parameters/pathId.yml
+      src/components/parameters/queryLimit.yml
+      src/components/parameters/queryOffset.yml
 
   Running:
-    'npx bc path path search/users --post --model user-search'
+    npx bc path search/users --post --model user-search
   Will create:
+    scaffolding:
+      .boatsrc
+      src/index.yml
+      src/components/schemas/index.yml
+      src/paths/index.yml
     paths:
       src/paths/search/users/post.yml
     models:
@@ -70,7 +85,7 @@ Examples:
 `);
 
   if (typeof exitCode === 'number') {
-    process.exit(exitCode);
+    throw new CliExit(exitCode);
   }
 
   return null;
@@ -94,8 +109,8 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
     return help(0);
   }
 
-  if (parsed.positionals?.length !== 1 && !parsed.values.name) {
-    return help(1, `path subcommand expects 1 positional argument for PATH, received ${parsed.positionals?.length ?? 0}`);
+  if (parsed.positionals.length !== 1 && !parsed.values.name) {
+    return help(1, `path subcommand expects 1 positional argument for PATH, received ${parsed.positionals.length}\nargs:  ${args.join(' ')}`);
   }
 
   const name = parsed.values.name?.toString() || parsed.positionals[0];
@@ -105,10 +120,34 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
     return help(1, `invalid path arg "${name}"`);
   }
 
-  let pathParams: { $ref: string }[] = [];
+  const tasks = getPathTasks({ ...parsed.values, name });
+
+  if (!tasks.length) {
+    return help(1, 'Error: Nothing to do. Aborting. Did you forget crud options (eg --get)?');
+  }
+
+  return tasks;
+};
+
+type PathGenerationOptions = {
+  name: string;
+  'no-models'?: boolean;
+  model?: string;
+  type?: string;
+  list?: boolean;
+  get?: boolean;
+  delete?: boolean;
+  patch?: boolean;
+  post?: boolean;
+  put?: boolean;
+};
+
+export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] => {
+  const pathParams: { $ref: string }[] = [];
   let lastIsParam = false;
   const tasks: GenerationTask[] = [];
 
+  const parts = options.name.split('/').filter(Boolean);
   for (let i = 0; i < parts.length; ++i) {
     const part = parts[i];
     if (!part) {
@@ -118,7 +157,11 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
     const pathParam = extractPathParam(part);
     if (pathParam) {
       lastIsParam = true;
-      tasks.push({ contents: () => getParam(pathParam, 'path'), filename: `src/components/parameters/path${capitalize(pathParam)}.yml` });
+      tasks.push({
+        contents: () => getParam(pathParam, 'path'),
+        filename: `src/components/parameters/path${capitalize(pathParam)}.yml`,
+        generate: !options['no-models'],
+      });
       pathParams.push({ $ref: `#/components/parameters/Path${capitalize(pathParam)}` });
       parts[i] = `{${pathParam}}`;
     } else {
@@ -129,63 +172,62 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
   const normalizedFilepath = parts.join('/');
   let normalizedBaseFilepath = parts.join('/');
 
-  let otherPathParams = pathParams.slice();
+  const otherPathParams = pathParams.slice();
 
   if (lastIsParam) {
     otherPathParams.pop();
     normalizedBaseFilepath = parts.slice(0, -1).join('/');
   }
 
-  const customModelName = parsed.values.model?.toString() || parts[parts.length - (lastIsParam ? 2 : 1)];
-  const singleModelName = parsed.values.model?.toString() || singular(customModelName);
+  const customModelName = options.model?.toString() || parts[parts.length - (lastIsParam ? 2 : 1)];
+  const singleModelName = options.model?.toString() || singular(customModelName);
   const dashName = dashCase(singleModelName);
   const singleName = camelCase(singleModelName);
-  pathParams = pathParams?.length ? pathParams : void 0;
 
-  if (parsed.values.list) {
+  if (options.list) {
     tasks.push(
       { contents: () => getList(customModelName, otherPathParams), filename: `src/paths/${normalizedBaseFilepath}/get.yml` },
-      { contents: () => getParam('limit', 'query'), filename: `src/components/parameters/queryLimit.yml`, generate: !parsed.values['no-models'] },
-      { contents: () => getParam('offset', 'query'), filename: `src/components/parameters/queryOffset.yml`, generate: !parsed.values['no-models'] },
-      { contents: getPaginationModel, filename: `src/components/schemas/pagination/model.yml`, generate: !parsed.values['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !parsed.values['no-models'] },
-      { contents: getModels, filename: `src/components/schemas/${dashName}/models.yml`, generate: !parsed.values['no-models'] },
+      { contents: () => getParam('limit', 'query', 'number'), filename: `src/components/parameters/queryLimit.yml`, generate: !options['no-models'] },
+      {
+        contents: () => getParam('offset', 'query', 'number'),
+        filename: 'src/components/parameters/queryOffset.yml',
+        generate: !options['no-models'],
+      },
+      { contents: getPaginationModel, filename: 'src/components/schemas/pagination/model.yml', generate: !options['no-models'] },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: getModels, filename: `src/components/schemas/${dashName}/models.yml`, generate: !options['no-models'] },
     );
   }
-  if (parsed.values.post) {
+  if (options.post) {
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/post.yml` },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/post.yml`, generate: !options['no-models'] },
       { contents: () => getCreate(singleName, otherPathParams), filename: `src/paths/${normalizedBaseFilepath}/post.yml` },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !parsed.values['no-models'] },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
     );
   }
 
-  if (parsed.values.get) {
+  if (options.get) {
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !parsed.values['no-models'] },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
       { contents: () => getShow(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/get.yml` },
     );
   }
-  if (parsed.values.delete) {
+  if (options.delete) {
     tasks.push({ contents: () => getDelete(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/delete.yml` });
   }
-  if (parsed.values.patch) {
+  if (options.patch) {
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !parsed.values['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/patch.yml` },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/patch.yml`, generate: !options['no-models'] },
       { contents: () => getUpdate(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/patch.yml` },
     );
   }
-  if (parsed.values.put) {
+  if (options.put) {
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !parsed.values['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/put.yml` },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: getModel, filename: `src/components/schemas/${dashName}/put.yml`, generate: !options['no-models'] },
       { contents: () => getReplace(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/put.yml` },
     );
-  }
-
-  if (!tasks.length) {
-    return help(1, 'Error: Nothing to do. Aborting. Did you forget crud options (eg --get)?');
   }
 
   return tasks;

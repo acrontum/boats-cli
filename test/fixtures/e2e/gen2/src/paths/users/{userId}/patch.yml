@@ -1,0 +1,20 @@
+summary: "Update user"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/UserPatch"
+responses:
+  "404":
+    description: "user not found"
+  "422":
+    description: "Invalid user supplied"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/User"

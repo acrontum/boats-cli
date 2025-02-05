@@ -1,8 +1,8 @@
 import { capitalize, dashCase, toYaml } from '../lib';
 
-export const getPathIndex = (): string => '{{ autoPathIndexer() }}';
+export const getPathIndex = (): string => '{{ autoPathIndexer() }}\n';
 
-export const getList = (pluralName: string, parameters?: { $ref: string }[]) => {
+export const getList = (pluralName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(pluralName).replace(/-/g, ' ');
 
   return toYaml({
@@ -24,7 +24,7 @@ export const getList = (pluralName: string, parameters?: { $ref: string }[]) => 
   });
 };
 
-export const getCreate = (singularName: string, parameters?: { $ref: string }[]) => {
+export const getCreate = (singularName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -54,7 +54,7 @@ export const getCreate = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getShow = (singularName: string, parameters?: { $ref: string }[]) => {
+export const getShow = (singularName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -76,7 +76,7 @@ export const getShow = (singularName: string, parameters?: { $ref: string }[]) =
   });
 };
 
-export const getDelete = (singularName: string, parameters?: { $ref: string }[]) => {
+export const getDelete = (singularName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -93,7 +93,7 @@ export const getDelete = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getUpdate = (singularName: string, parameters?: { $ref: string }[]) => {
+export const getUpdate = (singularName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -126,7 +126,7 @@ export const getUpdate = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getReplace = (singularName: string, parameters?: { $ref: string }[]) => {
+export const getReplace = (singularName: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({

@@ -1,0 +1,16 @@
+summary: "Create a user"
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/UserPost"
+responses:
+  "422":
+    description: "Invalid user supplied"
+  "201":
+    description: "Created"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/User"

@@ -1,0 +1,6 @@
+in: "path"
+name: "addresseId"
+required: true
+schema:
+  type: "string"
+description: "path param that does some stuff"

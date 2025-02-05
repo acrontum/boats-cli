@@ -1,0 +1,10 @@
+summary: "Show refresh token"
+responses:
+  "404":
+    description: "refresh token not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/RefreshToken"

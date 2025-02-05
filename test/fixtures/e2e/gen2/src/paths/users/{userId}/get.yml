@@ -1,0 +1,12 @@
+summary: "Show user"
+parameters:
+  - $ref: "#/components/parameters/PathUserId"
+responses:
+  "404":
+    description: "user not found"
+  "200":
+    description: "Success"
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/User"
