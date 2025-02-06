@@ -1,7 +1,7 @@
-import { CliArg, CliExit, SubcommandGenerator, buildHelpFromOpts, cliArguments, parseCliArgs } from '../cli';
+import { CliArg, CliExit, GlobalOptions, SubcommandGenerator, buildHelpFromOpts, cliArguments, parseCliArgs } from '../cli';
 import { GenerationTask, logger } from '../generate';
+import { argname, camelCase, capitalize, dashCase, description, getRootRef } from '../lib';
 import { getModel, getModels, getPaginationModel, getParam } from '../templates/model';
-import { argname, camelCase, capitalize, dashCase, description } from '../lib';
 
 type ModelGenerationOptions = {
   name: string;
@@ -14,6 +14,7 @@ type ModelGenerationOptions = {
   patch?: boolean;
   post?: boolean;
   put?: boolean;
+  rootRef?: string;
 };
 
 export const modelCliArguments: Record<string, CliArg> = {
@@ -84,7 +85,7 @@ Examples:
   return null;
 };
 
-export const parseModelCommand: SubcommandGenerator = (args: string[]): GenerationTask[] | null => {
+export const parseModelCommand: SubcommandGenerator = (args: string[], globalOptions: GlobalOptions): GenerationTask[] | null => {
   const parsed = parseCliArgs({ options: modelCliArguments, tokens: true, args, allowPositionals: true }, help);
   if (!parsed) {
     return null;
@@ -104,7 +105,7 @@ export const parseModelCommand: SubcommandGenerator = (args: string[]): Generati
     return help(1, 'Error: --type argument must be query, header, or path');
   }
 
-  return getModelTasks({ ...parsed.values, name });
+  return getModelTasks({ ...parsed.values, rootRef: globalOptions['root-ref'], name });
 };
 
 export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[] => {
@@ -118,6 +119,7 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
     generate: !options['no-model'] && !options.type,
   });
 
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/PaginationModel', options.rootRef);
   if (options.type) {
     tasks.push({
       contents: () => getParam(options.name, options.type as Exclude<(typeof options)['type'], undefined>),
@@ -127,7 +129,7 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
 
   if (options.list || options.crud) {
     tasks.push(
-      { contents: getModels, filename: `src/components/schemas/${dashName}/models.yml` },
+      { contents: () => getModels(paginationRef), filename: `src/components/schemas/${dashName}/models.yml` },
       { contents: () => getParam('limit', 'query', 'number'), filename: `src/components/parameters/queryLimit.yml` },
       { contents: () => getParam('offset', 'query', 'number'), filename: `src/components/parameters/queryOffset.yml` },
       { contents: () => getPaginationModel(), filename: `src/components/schemas/pagination/model.yml` },

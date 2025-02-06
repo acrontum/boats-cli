@@ -1,6 +1,6 @@
 summary: "Show user"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "../../../components/parameters/pathUserId.yml"
 responses:
   "404":
     description: "user not found"
@@ -9,4 +9,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/User"
+          $ref: "../../../components/schemas/user/model.yml"

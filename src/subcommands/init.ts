@@ -1,7 +1,7 @@
-import { CliExit, SubcommandGenerator } from '../cli';
+import { CliExit, GlobalOptions, SubcommandGenerator } from '../cli';
 import { GenerationTask, logger } from '../generate';
-import { getPathIndex } from '../templates/path';
 import { getComponentIndex } from '../templates/model';
+import { getPathIndex } from '../templates/path';
 
 const initUsage = `\
 Initialize BOATS project structure and files.
@@ -33,7 +33,7 @@ Examples:
     src/paths/index.yml
 `;
 
-export const parseInitCommand: SubcommandGenerator = (args: string[]) => {
+export const parseInitCommand: SubcommandGenerator = (args: string[], options: GlobalOptions) => {
   const tasks: GenerationTask[] = [];
 
   if (!args.length) {
@@ -49,7 +49,7 @@ export const parseInitCommand: SubcommandGenerator = (args: string[]) => {
       case '--all':
       case '-a':
         tasks.push(
-          { contents: getComponentIndex, filename: 'src/components/schemas/index.yml' },
+          { contents: () => getComponentIndex(options['root-ref']), filename: 'src/components/schemas/index.yml' },
           { contents: () => getComponentIndex(''), filename: 'src/components/parameters/index.yml' },
           { contents: getPathIndex, filename: 'src/paths/index.yml' },
         );

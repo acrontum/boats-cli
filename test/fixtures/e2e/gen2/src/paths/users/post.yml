@@ -4,7 +4,7 @@ requestBody:
   content:
     application/json:
       schema:
-        $ref: "#/components/schemas/UserPost"
+        $ref: "../../components/schemas/user/post.yml"
 responses:
   "422":
     description: "Invalid user supplied"
@@ -13,4 +13,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/User"
+          $ref: "../../components/schemas/user/model.yml"

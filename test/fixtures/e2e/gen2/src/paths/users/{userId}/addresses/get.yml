@@ -1,11 +1,11 @@
 summary: "List addresses"
 description: "List addresses"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "../../../../components/parameters/pathUserId.yml"
 responses:
   "200":
     description: "Success"
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Addresses"
+          $ref: "../../../../components/schemas/address/models.yml"

@@ -1,6 +1,6 @@
 summary: "Show album"
 parameters:
-  - $ref: "#/components/parameters/PathAlbumId"
+  - $ref: "../../../components/parameters/pathAlbumId.yml"
 responses:
   "404":
     description: "album not found"
@@ -9,4 +9,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Album"
+          $ref: "../../../components/schemas/album/model.yml"

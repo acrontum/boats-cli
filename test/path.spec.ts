@@ -35,6 +35,7 @@ describe('path.spec.ts', async () => {
 
     files = await cli(args);
     const outputFiles = Object.keys(files).sort();
+
     assert.deepStrictEqual(
       outputFiles,
       [
@@ -61,6 +62,7 @@ describe('path.spec.ts', async () => {
       ],
       'files mismatch',
     );
+
     assert.deepStrictEqual(await getAllFiles('test/output/path'), outputFiles, 'files mismatch');
 
     assert.equal(
@@ -85,6 +87,7 @@ describe('path.spec.ts', async () => {
     );
 
     assert.equal(await getFile('test/output/path/src/components/parameters/index.yml'), '{{ autoComponentIndexer() }}\n');
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/pathUserId.yml'),
       trimIndent`\
@@ -96,6 +99,7 @@ describe('path.spec.ts', async () => {
       description: "path param that does some stuff"
     `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/queryLimit.yml'),
       trimIndent`\
@@ -107,6 +111,7 @@ describe('path.spec.ts', async () => {
         description: "query param that does some stuff"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/queryOffset.yml'),
       trimIndent`\
@@ -118,7 +123,9 @@ describe('path.spec.ts', async () => {
         description: "query param that does some stuff"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/index.yml'), `{{ autoComponentIndexer('Model') }}\n`);
+
     assert.equal(
       await getFile('test/output/path/src/components/schemas/pagination/model.yml'),
       trimIndent`\
@@ -142,7 +149,9 @@ describe('path.spec.ts', async () => {
             description: "Total items available"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/user/model.yml'), baseModel);
+
     assert.equal(
       await getFile('test/output/path/src/components/schemas/user/models.yml'),
       trimIndent`\
@@ -152,16 +161,20 @@ describe('path.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/schemas/Pagination"
+            $ref: "../pagination/model.yml"
           data:
             type: "array"
             items:
               $ref: "./model.yml"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/user/patch.yml'), baseModel);
+
     assert.equal(await getFile('test/output/path/src/components/schemas/user/post.yml'), baseModel);
+
     assert.equal(await getFile('test/output/path/src/components/schemas/user/put.yml'), baseModel);
+
     assert.equal(
       await getFile('test/output/path/src/index.yml'),
       trimIndent`\
@@ -201,6 +214,7 @@ describe('path.spec.ts', async () => {
         }}
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/paths/index.yml'), '{{ autoPathIndexer() }}\n');
 
     assert.equal(
@@ -214,112 +228,117 @@ describe('path.spec.ts', async () => {
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Users"
+                  $ref: "../../components/schemas/user/models.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/post.yml'),
       trimIndent`\
-      summary: "Create a user"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserPost"
-      responses:
-        "422":
-          description: "Invalid user supplied"
-        "201":
-          description: "Created"
+        summary: "Create a user"
+        requestBody:
+          required: true
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "../../components/schemas/user/post.yml"
+        responses:
+          "422":
+            description: "Invalid user supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "../../components/schemas/user/model.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/delete.yml'),
       trimIndent`\
-      summary: "Delete user"
-      parameters:
-        - $ref: "#/components/parameters/PathUserId"
-      responses:
-        "404":
-          description: "user not found"
-        "204":
-          description: "Deleted"
+        summary: "Delete user"
+        parameters:
+          - $ref: "../../../components/parameters/pathUserId.yml"
+        responses:
+          "404":
+            description: "user not found"
+          "204":
+            description: "Deleted"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/get.yml'),
       trimIndent`\
-      summary: "Show user"
-      parameters:
-        - $ref: "#/components/parameters/PathUserId"
-      responses:
-        "404":
-          description: "user not found"
-        "200":
-          description: "Success"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
+        summary: "Show user"
+        parameters:
+          - $ref: "../../../components/parameters/pathUserId.yml"
+        responses:
+          "404":
+            description: "user not found"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "../../../components/schemas/user/model.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/patch.yml'),
       trimIndent`\
-      summary: "Update user"
-      parameters:
-        - $ref: "#/components/parameters/PathUserId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserPatch"
-      responses:
-        "404":
-          description: "user not found"
-        "422":
-          description: "Invalid user supplied"
-        "200":
-          description: "Success"
+        summary: "Update user"
+        parameters:
+          - $ref: "../../../components/parameters/pathUserId.yml"
+        requestBody:
+          required: true
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "../../../components/schemas/user/patch.yml"
+        responses:
+          "404":
+            description: "user not found"
+          "422":
+            description: "Invalid user supplied"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "../../../components/schemas/user/model.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/put.yml'),
       trimIndent`\
-      summary: "Create or replace user"
-      parameters:
-        - $ref: "#/components/parameters/PathUserId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserPut"
-      responses:
-        "422":
-          description: "Invalid user supplied"
-        "201":
-          description: "Created"
+        summary: "Create or replace user"
+        parameters:
+          - $ref: "../../../components/parameters/pathUserId.yml"
+        requestBody:
+          required: true
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "200":
-          description: "Replaced"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
+                $ref: "../../../components/schemas/user/put.yml"
+        responses:
+          "422":
+            description: "Invalid user supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "../../../components/schemas/user/model.yml"
+          "200":
+            description: "Replaced"
+            content:
+              application/json:
+                schema:
+                  $ref: "../../../components/schemas/user/model.yml"
       `,
     );
   });
@@ -330,7 +349,9 @@ describe('path.spec.ts', async () => {
     await assert.rejects(readdir('test/output/path'));
 
     files = await cli(args);
+
     const outputFiles = Object.keys(files).sort();
+
     assert.deepStrictEqual(
       outputFiles,
       [
@@ -356,10 +377,13 @@ describe('path.spec.ts', async () => {
       ],
       'files mismatch',
     );
+
     assert.deepStrictEqual(await getAllFiles('test/output/path'), outputFiles, 'files mismatch');
 
     assert.equal(await getFile('test/output/path/.boatsrc'), getBoatsRc());
+
     assert.equal(await getFile('test/output/path/src/components/parameters/index.yml'), '{{ autoComponentIndexer() }}\n');
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/pathPhotoId.yml'),
       trimIndent`\
@@ -371,6 +395,7 @@ describe('path.spec.ts', async () => {
         description: "path param that does some stuff"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/pathUserId.yml'),
       trimIndent`\
@@ -382,6 +407,7 @@ describe('path.spec.ts', async () => {
         description: "path param that does some stuff"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/queryLimit.yml'),
       trimIndent`\
@@ -393,6 +419,7 @@ describe('path.spec.ts', async () => {
         description: "query param that does some stuff"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/components/parameters/queryOffset.yml'),
       trimIndent`\
@@ -404,7 +431,9 @@ describe('path.spec.ts', async () => {
         description: "query param that does some stuff"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/index.yml'), "{{ autoComponentIndexer('Model') }}\n");
+
     assert.equal(
       await getFile('test/output/path/src/components/schemas/pagination/model.yml'),
       trimIndent`\
@@ -428,7 +457,9 @@ describe('path.spec.ts', async () => {
             description: "Total items available"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/photo/model.yml'), baseModel);
+
     assert.equal(
       await getFile('test/output/path/src/components/schemas/photo/models.yml'),
       trimIndent`\
@@ -438,16 +469,20 @@ describe('path.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/schemas/Pagination"
+            $ref: "../pagination/model.yml"
           data:
             type: "array"
             items:
               $ref: "./model.yml"
       `,
     );
+
     assert.equal(await getFile('test/output/path/src/components/schemas/photo/patch.yml'), baseModel);
+
     assert.equal(await getFile('test/output/path/src/components/schemas/photo/post.yml'), baseModel);
+
     assert.equal(await getFile('test/output/path/src/index.yml'), getIndex());
+
     assert.equal(await getFile('test/output/path/src/paths/index.yml'), '{{ autoPathIndexer() }}\n');
 
     assert.equal(
@@ -456,28 +491,29 @@ describe('path.spec.ts', async () => {
         summary: "List photos"
         description: "List photos"
         parameters:
-          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "../../../../components/parameters/pathUserId.yml"
         responses:
           "200":
             description: "Success"
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photos"
+                  $ref: "../../../../components/schemas/photo/models.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/photos/post.yml'),
       trimIndent`\
         summary: "Create a photo"
         parameters:
-          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "../../../../components/parameters/pathUserId.yml"
         requestBody:
           required: true
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PhotoPost"
+                $ref: "../../../../components/schemas/photo/post.yml"
         responses:
           "422":
             description: "Invalid photo supplied"
@@ -486,16 +522,17 @@ describe('path.spec.ts', async () => {
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photo"
+                  $ref: "../../../../components/schemas/photo/model.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/photos/{photoId}/delete.yml'),
       trimIndent`\
         summary: "Delete photo"
         parameters:
-          - $ref: "#/components/parameters/PathUserId"
-          - $ref: "#/components/parameters/PathPhotoId"
+          - $ref: "../../../../../components/parameters/pathUserId.yml"
+          - $ref: "../../../../../components/parameters/pathPhotoId.yml"
         responses:
           "404":
             description: "photo not found"
@@ -503,13 +540,14 @@ describe('path.spec.ts', async () => {
             description: "Deleted"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/photos/{photoId}/get.yml'),
       trimIndent`\
         summary: "Show photo"
         parameters:
-          - $ref: "#/components/parameters/PathUserId"
-          - $ref: "#/components/parameters/PathPhotoId"
+          - $ref: "../../../../../components/parameters/pathUserId.yml"
+          - $ref: "../../../../../components/parameters/pathPhotoId.yml"
         responses:
           "404":
             description: "photo not found"
@@ -518,22 +556,23 @@ describe('path.spec.ts', async () => {
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photo"
+                  $ref: "../../../../../components/schemas/photo/model.yml"
       `,
     );
+
     assert.equal(
       await getFile('test/output/path/src/paths/users/{userId}/photos/{photoId}/patch.yml'),
       trimIndent`\
         summary: "Update photo"
         parameters:
-          - $ref: "#/components/parameters/PathUserId"
-          - $ref: "#/components/parameters/PathPhotoId"
+          - $ref: "../../../../../components/parameters/pathUserId.yml"
+          - $ref: "../../../../../components/parameters/pathPhotoId.yml"
         requestBody:
           required: true
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PhotoPatch"
+                $ref: "../../../../../components/schemas/photo/patch.yml"
         responses:
           "404":
             description: "photo not found"
@@ -544,7 +583,7 @@ describe('path.spec.ts', async () => {
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/Photo"
+                  $ref: "../../../../../components/schemas/photo/model.yml"
       `,
     );
   });
@@ -552,6 +591,7 @@ describe('path.spec.ts', async () => {
   await it('can skip generating models', async () => {
     const args = toArgv('path users/:userId -crudlP --output test/output/path --quiet --dry-run');
     let files = await cli(args);
+
     assert.deepStrictEqual(
       Object.keys(files).sort(),
       [
@@ -580,6 +620,7 @@ describe('path.spec.ts', async () => {
     );
 
     files = await cli(args.concat('--no-models'));
+
     assert.deepStrictEqual(
       Object.keys(files).sort(),
       [
@@ -597,6 +638,7 @@ describe('path.spec.ts', async () => {
     );
 
     files = await cli(args.concat('--no-models', '--no-init'));
+
     assert.deepStrictEqual(
       Object.keys(files).sort(),
       [

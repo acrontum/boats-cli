@@ -1,7 +1,7 @@
 summary: "Delete address"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
-  - $ref: "#/components/parameters/PathAddresseId"
+  - $ref: "../../../../../components/parameters/pathUserId.yml"
+  - $ref: "../../../../../components/parameters/pathAddresseId.yml"
 responses:
   "404":
     description: "address not found"

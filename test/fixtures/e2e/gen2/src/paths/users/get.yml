@@ -6,4 +6,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Users"
+          $ref: "../../components/schemas/user/models.yml"

@@ -1,6 +1,6 @@
 summary: "Delete user"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "../../../components/parameters/pathUserId.yml"
 responses:
   "404":
     description: "user not found"

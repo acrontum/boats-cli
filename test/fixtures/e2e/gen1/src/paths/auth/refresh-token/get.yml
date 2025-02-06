@@ -7,4 +7,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/RefreshToken"
+          $ref: "../../../components/schemas/refresh-token/model.yml"

@@ -70,7 +70,7 @@ export const generate = async (tasks: GenerationTask[], options: GlobalOptions =
       if (!options['no-index']) {
         if (task.filename.indexOf('src/components/schemas/') !== -1) {
           const filename = join(output, 'src/components/schemas/index.yml');
-          mapped[filename] ||= { contents: (): string => getComponentIndex(), filename };
+          mapped[filename] ||= { contents: (): string => getComponentIndex(options['root-ref']), filename };
         } else if (task.filename.indexOf('src/components/parameters/') !== -1) {
           const filename = join(output, 'src/components/parameters/index.yml');
           mapped[filename] ||= { contents: (): string => getComponentIndex(''), filename };

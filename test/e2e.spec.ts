@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { readdir, readFile, rm } from 'node:fs/promises';
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
 import { cli, cliArguments } from '../src/cli';
 import { trimIndent } from '../src/lib';
@@ -149,7 +149,7 @@ describe('e2e.spec.ts', async () => {
 
     for (const fixtureFile of fixtures) {
       const outputFile = fixtureFile.replace('test/fixtures/e2e/gen1', 'test/output/e2e/gen1');
-      assert.strictEqual(await getFile(fixtureFile), await getFile(outputFile));
+      assert.strictEqual(await getFile(outputFile), await getFile(fixtureFile));
     }
   });
 
@@ -219,7 +219,7 @@ describe('e2e.spec.ts', async () => {
 
     for (const fixtureFile of fixtures) {
       const outputFile = fixtureFile.replace('test/fixtures/e2e/gen2', 'test/output/e2e/gen2');
-      assert.strictEqual(await getFile(fixtureFile), await getFile(outputFile));
+      assert.strictEqual(await getFile(outputFile), await getFile(fixtureFile));
     }
   });
 
@@ -241,12 +241,544 @@ describe('e2e.spec.ts', async () => {
 
     const longPathConflicts = [...globalKeys.values()].find((k) => pathKeys.has(k));
     const shortPathConflicts = [...globalShortKeys.values()].find((k) => pathShortKeys.has(k));
-    assert.strictEqual(typeof longPathConflicts, 'undefined', 'cli conflict with path args');
-    assert.strictEqual(typeof shortPathConflicts, 'undefined', 'cli conflict with path args');
+    assert.strictEqual(longPathConflicts, undefined, 'cli conflict with path args');
+    assert.strictEqual(shortPathConflicts, undefined, 'cli conflict with path args');
 
     const longModelConflicts = [...globalKeys.values()].find((k) => modelKeys.has(k));
     const shortModelConflicts = [...globalShortKeys.values()].find((k) => modelShortKeys.has(k));
-    assert.strictEqual(typeof longModelConflicts, 'undefined', 'cli conflict with model args');
-    assert.strictEqual(typeof shortModelConflicts, 'undefined', 'cli conflict with model args');
+    assert.strictEqual(longModelConflicts, undefined, 'cli conflict with model args');
+    assert.strictEqual(shortModelConflicts, undefined, 'cli conflict with model args');
+  });
+
+  await it('can generate files using custom root schema ref', async () => {
+    const allFiles = [
+      'test/output/e2e/root-ref/.boatsrc',
+      'test/output/e2e/root-ref/src/components/parameters/index.yml',
+      'test/output/e2e/root-ref/src/components/parameters/pathPhotoId.yml',
+      'test/output/e2e/root-ref/src/components/parameters/pathUserId.yml',
+      'test/output/e2e/root-ref/src/components/parameters/queryLimit.yml',
+      'test/output/e2e/root-ref/src/components/parameters/queryOffset.yml',
+      'test/output/e2e/root-ref/src/components/schemas/index.yml',
+      'test/output/e2e/root-ref/src/components/schemas/pagination/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/models.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/patch.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/post.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/models.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/patch.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/post.yml',
+      'test/output/e2e/root-ref/src/index.yml',
+      'test/output/e2e/root-ref/src/paths/index.yml',
+      'test/output/e2e/root-ref/src/paths/users/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/post.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/delete.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/patch.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/post.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/delete.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/patch.yml',
+    ];
+    const args = 'path users/:userId -crudl path users/:userId/photos/:photoId -crudl --quiet --output test/output/e2e/root-ref ';
+
+    const files = await cli(toArgv(args + ' --root-ref=Model'));
+    assert.deepStrictEqual(Object.keys(files).sort(), allFiles, 'file mismatch');
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/components/schemas/photo/models.yml'),
+      trimIndent`\
+        type: "object"
+        required:
+          - "meta"
+          - "data"
+        properties:
+          meta:
+            $ref: "#/components/Pagination"
+          data:
+            type: "array"
+            items:
+              $ref: "./model.yml"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/components/schemas/user/models.yml'),
+      trimIndent`\
+        type: "object"
+        required:
+          - "meta"
+          - "data"
+        properties:
+          meta:
+            $ref: "#/components/Pagination"
+          data:
+            type: "array"
+            items:
+              $ref: "./model.yml"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/get.yml'),
+      trimIndent`\
+        summary: "List users"
+        description: "List users"
+        responses:
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Users"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/post.yml'),
+      trimIndent`\
+        summary: "Create a user"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPost"
+        responses:
+          "422":
+            description: "Invalid user supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/get.yml'),
+      trimIndent`\
+        summary: "Show user"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        responses:
+          "404":
+            description: "user not found"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/patch.yml'),
+      trimIndent`\
+        summary: "Update user"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPatch"
+        responses:
+          "404":
+            description: "user not found"
+          "422":
+            description: "Invalid user supplied"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/User"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/get.yml'),
+      trimIndent`\
+        summary: "List photos"
+        description: "List photos"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        responses:
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photos"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/post.yml'),
+      trimIndent`\
+        summary: "Create a photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoPost"
+        responses:
+          "422":
+            description: "Invalid photo supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/get.yml'),
+      trimIndent`\
+        summary: "Show photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/PathPhotoId"
+        responses:
+          "404":
+            description: "photo not found"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/patch.yml'),
+      trimIndent`\
+        summary: "Update photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/PathPhotoId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoPatch"
+        responses:
+          "404":
+            description: "photo not found"
+          "422":
+            description: "Invalid photo supplied"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Photo"
+      `,
+      'wrong root ref output',
+    );
+  });
+
+  await it('can generate files using custom root schema ref which does not exist, or is empty (-)', async () => {
+    const allFiles = [
+      'test/output/e2e/root-ref/.boatsrc',
+      'test/output/e2e/root-ref/src/components/parameters/index.yml',
+      'test/output/e2e/root-ref/src/components/parameters/pathPhotoId.yml',
+      'test/output/e2e/root-ref/src/components/parameters/pathUserId.yml',
+      'test/output/e2e/root-ref/src/components/parameters/queryLimit.yml',
+      'test/output/e2e/root-ref/src/components/parameters/queryOffset.yml',
+      'test/output/e2e/root-ref/src/components/schemas/index.yml',
+      'test/output/e2e/root-ref/src/components/schemas/pagination/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/models.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/patch.yml',
+      'test/output/e2e/root-ref/src/components/schemas/photo/post.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/model.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/models.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/patch.yml',
+      'test/output/e2e/root-ref/src/components/schemas/user/post.yml',
+      'test/output/e2e/root-ref/src/index.yml',
+      'test/output/e2e/root-ref/src/paths/index.yml',
+      'test/output/e2e/root-ref/src/paths/users/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/post.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/delete.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/patch.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/post.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/delete.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/get.yml',
+      'test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/patch.yml',
+    ];
+    const args = 'path users/:userId -crudl path users/:userId/photos/:photoId -crudl --quiet --output test/output/e2e/root-ref ';
+
+    const files = await cli(toArgv(args + ' --root-ref=Blah'));
+    assert.deepStrictEqual(Object.keys(files).sort(), allFiles, 'file mismatch');
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/components/schemas/photo/models.yml'),
+      trimIndent`\
+        type: "object"
+        required:
+          - "meta"
+          - "data"
+        properties:
+          meta:
+            $ref: "#/components/PaginationModel"
+          data:
+            type: "array"
+            items:
+              $ref: "./model.yml"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/components/schemas/user/models.yml'),
+      trimIndent`\
+        type: "object"
+        required:
+          - "meta"
+          - "data"
+        properties:
+          meta:
+            $ref: "#/components/PaginationModel"
+          data:
+            type: "array"
+            items:
+              $ref: "./model.yml"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/get.yml'),
+      trimIndent`\
+        summary: "List users"
+        description: "List users"
+        responses:
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UserModels"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/post.yml'),
+      trimIndent`\
+        summary: "Create a user"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPost"
+        responses:
+          "422":
+            description: "Invalid user supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UserModel"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/get.yml'),
+      trimIndent`\
+        summary: "Show user"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        responses:
+          "404":
+            description: "user not found"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UserModel"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/patch.yml'),
+      trimIndent`\
+        summary: "Update user"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPatch"
+        responses:
+          "404":
+            description: "user not found"
+          "422":
+            description: "Invalid user supplied"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/UserModel"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/get.yml'),
+      trimIndent`\
+        summary: "List photos"
+        description: "List photos"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        responses:
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/PhotoModels"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/post.yml'),
+      trimIndent`\
+        summary: "Create a photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoPost"
+        responses:
+          "422":
+            description: "Invalid photo supplied"
+          "201":
+            description: "Created"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/PhotoModel"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/get.yml'),
+      trimIndent`\
+        summary: "Show photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/PathPhotoId"
+        responses:
+          "404":
+            description: "photo not found"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/PhotoModel"
+      `,
+      'wrong root ref output',
+    );
+
+    assert.deepStrictEqual(
+      await getFile('test/output/e2e/root-ref/src/paths/users/{userId}/photos/{photoId}/patch.yml'),
+      trimIndent`\
+        summary: "Update photo"
+        parameters:
+          - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/PathPhotoId"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotoPatch"
+        responses:
+          "404":
+            description: "photo not found"
+          "422":
+            description: "Invalid photo supplied"
+          "200":
+            description: "Success"
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/PhotoModel"
+      `,
+      'wrong root ref output',
+    );
+  });
+
+  await it('can generate files using disabled root schema ref', async () => {
+    // if the other test is passing (-R 'Blah'), this should have the same effect as disabling root ref
+    // except for the param passed into component indexer
+    const baseFiles = await cli(
+      toArgv(`
+      path users/:userId -crudl
+      path users/:userId/photos/:photoId -crudl
+      --quiet
+      --output test/output/e2e/root-ref-base
+      --root-ref=Blah
+    `),
+    );
+
+    const allFiles = Object.keys(baseFiles)
+      .map((file) => file.replace('/root-ref-base/', '/root-ref-off/'))
+      .sort();
+    assert.strictEqual(await getFile('test/output/e2e/root-ref-base/src/components/schemas/index.yml'), "{{ autoComponentIndexer('Blah') }}\n");
+    await writeFile('test/output/e2e/root-ref-base/src/components/schemas/index.yml', '{{ autoComponentIndexer() }}\n', { encoding: 'utf8' });
+
+    const args = 'path users/:userId -crudl path users/:userId/photos/:photoId -crudl --quiet --output test/output/e2e/root-ref-off ';
+
+    let files = await cli(toArgv(args + ' --root-ref=-'));
+    assert.deepStrictEqual(Object.keys(files).sort(), allFiles, 'file mismatch');
+    for (const file of allFiles) {
+      assert.strictEqual(await getFile(file.replace('/root-ref-off/', '/root-ref-base/')), await getFile(file), 'content mismatch');
+    }
+
+    files = await cli(toArgv(args + ' -R-'));
+    assert.deepStrictEqual(Object.keys(files).sort(), allFiles, 'file mismatch');
+    for (const file of allFiles) {
+      assert.strictEqual(await getFile(file.replace('/root-ref-off/', '/root-ref-base/')), await getFile(file), 'content mismatch');
+    }
   });
 }).catch(console.warn);

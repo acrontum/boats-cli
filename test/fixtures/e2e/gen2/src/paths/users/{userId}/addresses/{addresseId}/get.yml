@@ -1,7 +1,7 @@
 summary: "Show address"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
-  - $ref: "#/components/parameters/PathAddresseId"
+  - $ref: "../../../../../components/parameters/pathUserId.yml"
+  - $ref: "../../../../../components/parameters/pathAddresseId.yml"
 responses:
   "404":
     description: "address not found"
@@ -10,4 +10,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Address"
+          $ref: "../../../../../components/schemas/address/model.yml"

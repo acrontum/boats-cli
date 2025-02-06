@@ -1,8 +1,23 @@
-import { CliArg, CliExit, SubcommandGenerator, buildHelpFromOpts, parseCliArgs } from '../cli';
+import { dirname, relative } from 'path';
+import { CliArg, CliExit, GlobalOptions, SubcommandGenerator, buildHelpFromOpts, parseCliArgs } from '../cli';
 import { GenerationTask, logger } from '../generate';
-import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '../templates/path';
+import { argname, camelCase, capitalize, dashCase, description, getRootRef, singular } from '../lib';
 import { getModel, getModels, getPaginationModel, getParam } from '../templates/model';
-import { argname, camelCase, capitalize, dashCase, description, singular } from '../lib';
+import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '../templates/path';
+
+type PathGenerationOptions = {
+  name: string;
+  'no-models'?: boolean;
+  model?: string;
+  type?: string;
+  list?: boolean;
+  get?: boolean;
+  delete?: boolean;
+  patch?: boolean;
+  post?: boolean;
+  put?: boolean;
+  rootRef?: string;
+};
 
 export const pathCliArguments: Record<string, CliArg> = {
   list: { type: 'boolean', short: 'l', [description]: 'Create a models.yml file' },
@@ -91,15 +106,7 @@ Examples:
   return null;
 };
 
-const extractPathParam = (part: string): string | null => {
-  const param = part.replace(/[:}{]/g, '');
-  if (param !== part) {
-    return param;
-  }
-  return null;
-};
-
-export const parsePathCommand: SubcommandGenerator = (args: string[]): GenerationTask[] | null => {
+export const parsePathCommand: SubcommandGenerator = (args: string[], globalOptions: GlobalOptions): GenerationTask[] | null => {
   const parsed = parseCliArgs({ options: pathCliArguments, tokens: true, args, allowPositionals: true }, help);
   if (!parsed) {
     return null;
@@ -120,7 +127,7 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
     return help(1, `invalid path arg "${name}"`);
   }
 
-  const tasks = getPathTasks({ ...parsed.values, name });
+  const tasks = getPathTasks({ ...parsed.values, rootRef: globalOptions['root-ref'], name });
 
   if (!tasks.length) {
     return help(1, 'Error: Nothing to do. Aborting. Did you forget crud options (eg --get)?');
@@ -129,21 +136,8 @@ export const parsePathCommand: SubcommandGenerator = (args: string[]): Generatio
   return tasks;
 };
 
-type PathGenerationOptions = {
-  name: string;
-  'no-models'?: boolean;
-  model?: string;
-  type?: string;
-  list?: boolean;
-  get?: boolean;
-  delete?: boolean;
-  patch?: boolean;
-  post?: boolean;
-  put?: boolean;
-};
-
 export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] => {
-  const pathParams: { $ref: string }[] = [];
+  const pathParams: { rootRef: string; srcRef: string }[] = [];
   let lastIsParam = false;
   const tasks: GenerationTask[] = [];
 
@@ -162,7 +156,10 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
         filename: `src/components/parameters/path${capitalize(pathParam)}.yml`,
         generate: !options['no-models'],
       });
-      pathParams.push({ $ref: `#/components/parameters/Path${capitalize(pathParam)}` });
+      pathParams.push({
+        rootRef: `#/components/parameters/Path${capitalize(pathParam)}`,
+        srcRef: `src/components/parameters/path${capitalize(pathParam)}.yml`,
+      });
       parts[i] = `{${pathParam}}`;
     } else {
       lastIsParam = false;
@@ -182,11 +179,20 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
   const customModelName = options.model?.toString() || parts[parts.length - (lastIsParam ? 2 : 1)];
   const singleModelName = options.model?.toString() || singular(customModelName);
   const dashName = dashCase(singleModelName);
-  const singleName = camelCase(singleModelName);
+  const singularName = camelCase(singleModelName);
+
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/PaginationModel', options.rootRef);
 
   if (options.list) {
+    const filename = `src/paths/${normalizedBaseFilepath}/get.yml`;
+    const listSchemaRef = getRootRef(
+      relative(`src/paths/${normalizedBaseFilepath}`, `src/components/schemas/${dashName}/models.yml`),
+      `#/components/schemas/${capitalize(singleModelName)}Models`,
+      options.rootRef,
+    );
+    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), options.rootRef);
+
     tasks.push(
-      { contents: () => getList(customModelName, otherPathParams), filename: `src/paths/${normalizedBaseFilepath}/get.yml` },
       { contents: () => getParam('limit', 'query', 'number'), filename: `src/components/parameters/queryLimit.yml`, generate: !options['no-models'] },
       {
         contents: () => getParam('offset', 'query', 'number'),
@@ -195,40 +201,117 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
       },
       { contents: getPaginationModel, filename: 'src/components/schemas/pagination/model.yml', generate: !options['no-models'] },
       { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: getModels, filename: `src/components/schemas/${dashName}/models.yml`, generate: !options['no-models'] },
+      { contents: () => getModels(paginationRef), filename: `src/components/schemas/${dashName}/models.yml`, generate: !options['no-models'] },
+      { contents: () => getList(customModelName, listSchemaRef, paramRefs), filename },
     );
   }
+
   if (options.post) {
+    const filename = `src/paths/${normalizedBaseFilepath}/post.yml`;
+    const postRequestRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/post.yml`),
+      `#/components/schemas/${capitalize(singularName)}Post`,
+      options.rootRef,
+    );
+    const postResponseRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
+      `#/components/schemas/${capitalize(singularName)}Model`,
+      options.rootRef,
+    );
+    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), options.rootRef);
+
     tasks.push(
       { contents: getModel, filename: `src/components/schemas/${dashName}/post.yml`, generate: !options['no-models'] },
-      { contents: () => getCreate(singleName, otherPathParams), filename: `src/paths/${normalizedBaseFilepath}/post.yml` },
       { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: () => getCreate(singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
 
   if (options.get) {
+    const filename = `src/paths/${normalizedFilepath}/get.yml`;
+    const postResponseRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
+      `#/components/schemas/${capitalize(singularName)}Model`,
+      options.rootRef,
+    );
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+
     tasks.push(
       { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: () => getShow(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/get.yml` },
+      { contents: () => getShow(singularName, postResponseRef, paramRefs), filename },
     );
   }
+
   if (options.delete) {
-    tasks.push({ contents: () => getDelete(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/delete.yml` });
+    const filename = `src/paths/${normalizedFilepath}/delete.yml`;
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+
+    tasks.push({ contents: () => getDelete(singularName, paramRefs), filename });
   }
+
   if (options.patch) {
+    const filename = `src/paths/${normalizedFilepath}/patch.yml`;
+    const postRequestRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/patch.yml`),
+      `#/components/schemas/${capitalize(singularName)}Patch`,
+      options.rootRef,
+    );
+    const postResponseRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
+      `#/components/schemas/${capitalize(singularName)}Model`,
+      options.rootRef,
+    );
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+
     tasks.push(
       { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
       { contents: getModel, filename: `src/components/schemas/${dashName}/patch.yml`, generate: !options['no-models'] },
-      { contents: () => getUpdate(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/patch.yml` },
+      { contents: () => getUpdate(singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
+
   if (options.put) {
+    const filename = `src/paths/${normalizedFilepath}/put.yml`;
+    const postRequestRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/put.yml`),
+      `#/components/schemas/${capitalize(singularName)}Put`,
+      options.rootRef,
+    );
+    const postResponseRef = getRootRef(
+      relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
+      `#/components/schemas/${capitalize(singularName)}Model`,
+      options.rootRef,
+    );
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+
     tasks.push(
       { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
       { contents: getModel, filename: `src/components/schemas/${dashName}/put.yml`, generate: !options['no-models'] },
-      { contents: () => getReplace(singleName, pathParams), filename: `src/paths/${normalizedFilepath}/put.yml` },
+      { contents: () => getReplace(singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
 
   return tasks;
+};
+
+const extractPathParam = (part: string): string | null => {
+  const param = part.replace(/[:}{]/g, '');
+  if (param !== part) {
+    return param;
+  }
+  return null;
+};
+
+const mapParamRefs = (paramRefs: { rootRef: string; srcRef: string }[], pathLocation: string, rootRef?: string): { $ref: string }[] => {
+  if (!paramRefs.length) {
+    return [];
+  }
+
+  return paramRefs.map((param) => {
+    if (!rootRef) {
+      return { $ref: relative(pathLocation, param.srcRef) };
+    }
+
+    return { $ref: getRootRef('', param.rootRef, rootRef) };
+  });
 };

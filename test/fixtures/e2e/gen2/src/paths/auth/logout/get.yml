@@ -7,4 +7,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Logout"
+          $ref: "../../../components/schemas/logout/model.yml"
