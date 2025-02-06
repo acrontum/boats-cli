@@ -26,7 +26,8 @@ export const modelCliArguments: Record<string, CliArg> = {
   name: { type: 'string', short: 'n', [description]: 'Model name (in case positional conflicts with parent commands)' },
   patch: { type: 'boolean', short: 'u', [description]: 'Create a patch.yml file' },
   post: { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
-  put: { type: 'boolean', short: 'U', [description]: 'Create a put.yml file' },
+  put: { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
+  quest: { type: 'boolean', [description]: 'Create a put.yml file' },
   type: { type: 'string', [argname]: 'PARAM_TYPE', short: 't', [description]: 'Generate query, path, or header param' },
 };
 

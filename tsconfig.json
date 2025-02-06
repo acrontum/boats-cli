@@ -2,7 +2,7 @@
   /* https://github.com/tsconfig/bases/blob/main/bases/node22.json */
   "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es2024",
     "module": "NodeNext",
     "declaration": true,
     "emitDecoratorMetadata": true,

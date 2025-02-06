@@ -12,11 +12,11 @@ export const pathCliArguments: Record<string, CliArg> = {
   put: { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
   post: { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
   name: { type: 'string', [argname]: 'NAME', short: 'n', [description]: 'Path name (in case positional conflicts with parent commands)' },
-  'no-models': { type: 'boolean', short: 'm', [description]: 'Skip creating any models, only the path file (will create by default)' },
+  'no-models': { type: 'boolean', short: 'M', [description]: 'Skip creating any models, only the path file (will create by default)' },
   model: {
     type: 'string',
     [argname]: 'DASH_NAME',
-    short: 'M',
+    short: 'm',
     [description]: "Custom path model name (eg 'path /search/users --model=user-search')",
   },
   help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },

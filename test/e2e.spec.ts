@@ -1,8 +1,10 @@
 import assert from 'node:assert';
 import { readdir, readFile, rm } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
-import { cli } from '../src/cli';
+import { cli, cliArguments } from '../src/cli';
 import { trimIndent } from '../src/lib';
+import { modelCliArguments } from '../src/subcommands/model';
+import { pathCliArguments } from '../src/subcommands/path';
 import { getAllFiles, getFile, toArgv } from './shared';
 
 describe('e2e.spec.ts', async () => {
@@ -219,5 +221,32 @@ describe('e2e.spec.ts', async () => {
       const outputFile = fixtureFile.replace('test/fixtures/e2e/gen2', 'test/output/e2e/gen2');
       assert.strictEqual(await getFile(fixtureFile), await getFile(outputFile));
     }
+  });
+
+  await it('should not have global short and long opt conflicts with subcommands', () => {
+    const globalKeys = new Set(Object.keys(cliArguments));
+    globalKeys.delete('help');
+    const globalShortKeys = new Set([...globalKeys.values()].map((key) => cliArguments[key].short || '_delete_'));
+    globalShortKeys.delete('_delete_');
+
+    const pathKeys = new Set(Object.keys(pathCliArguments));
+    pathKeys.delete('help');
+    const pathShortKeys = new Set([...pathKeys.values()].map((key) => pathCliArguments[key].short || '_delete_'));
+    pathShortKeys.delete('_delete_');
+
+    const modelKeys = new Set(Object.keys(modelCliArguments));
+    modelKeys.delete('help');
+    const modelShortKeys = new Set([...modelKeys.values()].map((key) => modelCliArguments[key].short || '_delete_'));
+    modelShortKeys.delete('_delete_');
+
+    const longPathConflicts = [...globalKeys.values()].find((k) => pathKeys.has(k));
+    const shortPathConflicts = [...globalShortKeys.values()].find((k) => pathShortKeys.has(k));
+    assert.strictEqual(typeof longPathConflicts, 'undefined', 'cli conflict with path args');
+    assert.strictEqual(typeof shortPathConflicts, 'undefined', 'cli conflict with path args');
+
+    const longModelConflicts = [...globalKeys.values()].find((k) => modelKeys.has(k));
+    const shortModelConflicts = [...globalShortKeys.values()].find((k) => modelShortKeys.has(k));
+    assert.strictEqual(typeof longModelConflicts, 'undefined', 'cli conflict with model args');
+    assert.strictEqual(typeof shortModelConflicts, 'undefined', 'cli conflict with model args');
   });
 }).catch(console.warn);

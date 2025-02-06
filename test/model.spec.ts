@@ -197,7 +197,7 @@ describe('model.spec.ts', async () => {
       `,
     );
 
-    files = await cli(toArgv('model user -crudlU --output test/output/model --quiet'));
+    files = await cli(toArgv('model user -crudlP --output test/output/model --quiet'));
     assert.deepStrictEqual(
       Object.keys(files).sort(),
       [

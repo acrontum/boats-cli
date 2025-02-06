@@ -1,8 +1,8 @@
 import { Dirent } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { logger } from '../src/generate';
 import { getModel } from '../src/templates/model';
-import { logger } from '../src';
 
 export const toArgv = (text: string): string[] => text.trim().split(/\s+/);
 
