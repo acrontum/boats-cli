@@ -1,11 +1,11 @@
 summary: "List songs"
 description: "List songs"
 parameters:
-  - $ref: "#/components/parameters/PathAlbumId"
+  - $ref: "../../../../components/parameters/pathAlbumId.yml"
 responses:
   "200":
     description: "Success"
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Songs"
+          $ref: "../../../../components/schemas/song/models.yml"

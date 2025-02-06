@@ -143,7 +143,7 @@ describe('model.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/schemas/Pagination"
+            $ref: "../pagination/model.yml"
           data:
             type: "array"
             items:

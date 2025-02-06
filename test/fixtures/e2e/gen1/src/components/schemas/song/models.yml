@@ -4,7 +4,7 @@ required:
   - "data"
 properties:
   meta:
-    $ref: "#/components/schemas/Pagination"
+    $ref: "../pagination/model.yml"
   data:
     type: "array"
     items:

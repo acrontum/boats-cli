@@ -1,12 +1,12 @@
 summary: "Create a address"
 parameters:
-  - $ref: "#/components/parameters/PathUserId"
+  - $ref: "../../../../components/parameters/pathUserId.yml"
 requestBody:
   required: true
   content:
     application/json:
       schema:
-        $ref: "#/components/schemas/AddressPost"
+        $ref: "../../../../components/schemas/address/post.yml"
 responses:
   "422":
     description: "Invalid address supplied"
@@ -15,4 +15,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Address"
+          $ref: "../../../../components/schemas/address/model.yml"

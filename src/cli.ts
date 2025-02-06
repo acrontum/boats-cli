@@ -20,8 +20,9 @@ export type GlobalOptions = {
   output?: string;
   quiet?: boolean;
   verbose?: boolean;
+  'root-ref'?: string;
 };
-export type SubcommandGenerator = (args: string[], options?: GlobalOptions) => GenerationTask[] | null;
+export type SubcommandGenerator = (args: string[], options: GlobalOptions) => GenerationTask[] | null;
 
 /**
  * Custom error to immediately exit on errors.
@@ -51,6 +52,15 @@ export const cliArguments: Record<string, CliArg> = {
   output: { type: 'string', short: 'o', [argname]: 'OUTPUT_DIR', [description]: 'Location to output files to (defaults to current folder)' },
   quiet: { type: 'boolean', short: 'q', [description]: 'Only output errors' },
   verbose: { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
+  'root-ref': {
+    type: 'string',
+    short: 'R',
+    [argname]: 'TRIM',
+    [description]:
+      'Use root ref (#/) in schema refs instead of relative paths. ' +
+      "TRIM should match autoComponentIndexer (usually 'Model'). " +
+      "If TRIM is '-' then '' is passed to indexer",
+  },
   help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
 };
 
@@ -177,15 +187,15 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
         }
 
         if (arg.name in cliArguments) {
-          if (arg.name === 'output') {
+          if (arg.name === 'output' || arg.name === 'root-ref') {
             if (!arg.value) {
               help(1, `Parameter '--${arg.name}' requires a value`);
 
               return {};
             }
-            globalOptions.output = arg.value[0] === '/' ? arg.value : relative('.', arg.value);
+            globalOptions[arg.name] = arg.value;
           } else {
-            globalOptions[arg.name as Exclude<keyof typeof globalOptions, 'output'>] = true;
+            globalOptions[arg.name as Exclude<keyof typeof globalOptions, 'output' | 'root-ref'>] = true;
           }
 
           if (arg.name === 'verbose') {
@@ -243,6 +253,10 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
     if (subcommandTasks?.length) {
       tasks.push(...subcommandTasks);
     }
+  }
+
+  if (globalOptions.output && globalOptions.output[0] !== '/') {
+    globalOptions.output = relative('.', globalOptions.output);
   }
 
   if (!globalOptions['no-init']) {

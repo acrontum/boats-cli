@@ -1,6 +1,12 @@
 import { toYaml } from '../lib';
 
-export const getComponentIndex = (trim = "'Model'"): string => `{{ autoComponentIndexer(${trim}) }}\n`;
+export const getComponentIndex = (rootRef?: string): string => {
+  if (rootRef === '-' || rootRef === '') {
+    return '{{ autoComponentIndexer() }}\n';
+  }
+
+  return `{{ autoComponentIndexer('${rootRef || 'Model'}') }}\n`;
+};
 
 export const getModel = (): string => {
   return toYaml({
@@ -19,12 +25,12 @@ export const getModel = (): string => {
   });
 };
 
-export const getModels = (paginationSchema: string = '#/components/schemas/Pagination'): string => {
+export const getModels = (paginationRef: string = '../pagination/model.yml'): string => {
   return toYaml({
     type: 'object',
     required: ['meta', 'data'],
     properties: {
-      meta: { $ref: paginationSchema },
+      meta: { $ref: paginationRef },
       data: {
         type: 'array',
         items: { $ref: './model.yml' },

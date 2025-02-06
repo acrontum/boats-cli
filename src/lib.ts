@@ -140,3 +140,21 @@ export const trimIndent = (strings: TemplateStringsArray, ...replacements: strin
 
   return result;
 };
+
+/**
+ * Convert relative ref to root ref, stripping the trailing trimEnd
+ *
+ * eg: getRootRef('../pagination/model.yml', '#/components/PaginationModel', 'Model')
+ */
+export const getRootRef = (localRef: string, rootRef: string, trimEnd?: string): string => {
+  if (!trimEnd) {
+    return localRef;
+  }
+
+  const lastRootRefIndex = rootRef.lastIndexOf(trimEnd);
+  if (lastRootRefIndex !== -1) {
+    return rootRef.slice(0, lastRootRefIndex) + rootRef.slice(lastRootRefIndex + trimEnd.length);
+  } else {
+    return rootRef;
+  }
+};

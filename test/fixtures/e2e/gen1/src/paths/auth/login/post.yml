@@ -4,7 +4,7 @@ requestBody:
   content:
     application/json:
       schema:
-        $ref: "#/components/schemas/LoginPost"
+        $ref: "../../../components/schemas/login/post.yml"
 responses:
   "422":
     description: "Invalid login supplied"
@@ -13,4 +13,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Login"
+          $ref: "../../../components/schemas/login/model.yml"

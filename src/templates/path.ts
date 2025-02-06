@@ -1,8 +1,8 @@
-import { capitalize, dashCase, toYaml } from '../lib';
+import { dashCase, toYaml } from '../lib';
 
 export const getPathIndex = (): string => '{{ autoPathIndexer() }}\n';
 
-export const getList = (pluralName: string, parameters?: { $ref: string }[]): string => {
+export const getList = (pluralName: string, schemaRef: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(pluralName).replace(/-/g, ' ');
 
   return toYaml({
@@ -14,9 +14,7 @@ export const getList = (pluralName: string, parameters?: { $ref: string }[]): st
         description: 'Success',
         content: {
           'application/json': {
-            schema: {
-              $ref: `#/components/schemas/${capitalize(pluralName)}`,
-            },
+            schema: { $ref: schemaRef },
           },
         },
       },
@@ -24,7 +22,7 @@ export const getList = (pluralName: string, parameters?: { $ref: string }[]): st
   });
 };
 
-export const getCreate = (singularName: string, parameters?: { $ref: string }[]): string => {
+export const getCreate = (singularName: string, requestSchemaRef: string, responseSchemaRef: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -34,7 +32,7 @@ export const getCreate = (singularName: string, parameters?: { $ref: string }[])
       required: true,
       content: {
         'application/json': {
-          schema: { $ref: `#/components/schemas/${capitalize(singularName)}Post` },
+          schema: { $ref: requestSchemaRef },
         },
       },
     },
@@ -46,7 +44,7 @@ export const getCreate = (singularName: string, parameters?: { $ref: string }[])
         description: 'Created',
         content: {
           'application/json': {
-            schema: { $ref: `#/components/schemas/${capitalize(singularName)}` },
+            schema: { $ref: responseSchemaRef },
           },
         },
       },
@@ -54,7 +52,7 @@ export const getCreate = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getShow = (singularName: string, parameters?: { $ref: string }[]): string => {
+export const getShow = (singularName: string, responseSchemaRef: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -68,7 +66,7 @@ export const getShow = (singularName: string, parameters?: { $ref: string }[]): 
         description: 'Success',
         content: {
           'application/json': {
-            schema: { $ref: `#/components/schemas/${capitalize(singularName)}` },
+            schema: { $ref: responseSchemaRef },
           },
         },
       },
@@ -93,7 +91,7 @@ export const getDelete = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getUpdate = (singularName: string, parameters?: { $ref: string }[]): string => {
+export const getUpdate = (singularName: string, requestSchemaRef: string, responseSchemaRef: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -103,7 +101,7 @@ export const getUpdate = (singularName: string, parameters?: { $ref: string }[])
       required: true,
       content: {
         'application/json': {
-          schema: { $ref: `#/components/schemas/${capitalize(singularName)}Patch` },
+          schema: { $ref: requestSchemaRef },
         },
       },
     },
@@ -118,7 +116,7 @@ export const getUpdate = (singularName: string, parameters?: { $ref: string }[])
         description: 'Success',
         content: {
           'application/json': {
-            schema: { $ref: `#/components/schemas/${capitalize(singularName)}` },
+            schema: { $ref: responseSchemaRef },
           },
         },
       },
@@ -126,7 +124,7 @@ export const getUpdate = (singularName: string, parameters?: { $ref: string }[])
   });
 };
 
-export const getReplace = (singularName: string, parameters?: { $ref: string }[]): string => {
+export const getReplace = (singularName: string, requestSchemaRef: string, responseSchemaRef: string, parameters?: { $ref: string }[]): string => {
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml({
@@ -136,7 +134,7 @@ export const getReplace = (singularName: string, parameters?: { $ref: string }[]
       required: true,
       content: {
         'application/json': {
-          schema: { $ref: `#/components/schemas/${capitalize(singularName)}Put` },
+          schema: { $ref: requestSchemaRef },
         },
       },
     },
@@ -148,7 +146,7 @@ export const getReplace = (singularName: string, parameters?: { $ref: string }[]
         description: 'Created',
         content: {
           'application/json': {
-            schema: { $ref: `#/components/schemas/${capitalize(singularName)}` },
+            schema: { $ref: responseSchemaRef },
           },
         },
       },
@@ -156,7 +154,7 @@ export const getReplace = (singularName: string, parameters?: { $ref: string }[]
         description: 'Replaced',
         content: {
           'application/json': {
-            schema: { $ref: `#/components/schemas/${capitalize(singularName)}` },
+            schema: { $ref: responseSchemaRef },
           },
         },
       },

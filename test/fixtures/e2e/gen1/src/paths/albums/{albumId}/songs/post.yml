@@ -1,12 +1,12 @@
 summary: "Create a song"
 parameters:
-  - $ref: "#/components/parameters/PathAlbumId"
+  - $ref: "../../../../components/parameters/pathAlbumId.yml"
 requestBody:
   required: true
   content:
     application/json:
       schema:
-        $ref: "#/components/schemas/SongPost"
+        $ref: "../../../../components/schemas/song/post.yml"
 responses:
   "422":
     description: "Invalid song supplied"
@@ -15,4 +15,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: "#/components/schemas/Song"
+          $ref: "../../../../components/schemas/song/model.yml"
