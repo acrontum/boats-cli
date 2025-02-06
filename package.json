@@ -1,6 +1,6 @@
 {
   "name": "@acrontum/boats-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A CLI that generates boats projects, paths, schemas and queries",
   "main": "dist/src/cli.js",
   "repository": {
