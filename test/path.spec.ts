@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 import { readdir, rm } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
-import { getBoatsRc, getIndex } from '../src';
 import { cli } from '../src/cli';
 import { trimIndent } from '../src/lib';
+import { getBoatsRc, getIndex } from '../src/templates/init';
 import { baseModel, getAllFiles, getFile, toArgv } from './shared';
 
 describe('path.spec.ts', async () => {

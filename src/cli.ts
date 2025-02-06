@@ -44,12 +44,11 @@ const subcommands: Record<string, SubcommandGenerator> = {
 };
 
 export const cliArguments: Record<string, CliArg> = {
-  'dry-run': { type: 'boolean', short: 'd', [description]: 'Print the changes to be made' },
+  'dry-run': { type: 'boolean', short: 'D', [description]: 'Print the changes to be made' },
   force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
-  init: { type: 'boolean', short: 'i', [description]: 'Create folder structure and base files' },
-  'no-index': { type: 'boolean', short: 'n', [description]: 'Skip auto-creating index files, only models' },
-  'no-init': { type: 'boolean', short: 'n', [description]: 'Skip auto-creating init files' },
-  output: { type: 'string', short: 'o', [description]: 'Location to output files to (defaults to current folder)' },
+  'no-index': { type: 'boolean', short: 'I', [description]: 'Skip auto-creating index files, only models' },
+  'no-init': { type: 'boolean', short: 'N', [description]: 'Skip auto-creating init files' },
+  output: { type: 'string', short: 'o', [argname]: 'OUTPUT_DIR', [description]: 'Location to output files to (defaults to current folder)' },
   quiet: { type: 'boolean', short: 'q', [description]: 'Only output errors' },
   verbose: { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
   help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
@@ -163,7 +162,7 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
 
   let done = false;
   let hasSubCommand = false;
-  for (let i = 0; i < processed.tokens.length; ++i) {
+  for (let i = 0; i < processed.tokens.length && !done; ++i) {
     const arg = processed.tokens[i];
     switch (arg.kind) {
       case 'option':
@@ -226,9 +225,6 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
       case 'option-terminator':
         done = true;
         break;
-    }
-    if (done) {
-      break;
     }
   }
 
