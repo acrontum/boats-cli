@@ -20,7 +20,7 @@
   </a>
 </p>
 
-**Early alhpa, docs and functionality will change**
+**Early alpha, docs and functionality will change**
 
 <!-- 
 npx --yes doctoc --github readme.md
