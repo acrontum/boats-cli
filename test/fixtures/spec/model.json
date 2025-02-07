@@ -1,0 +1,184 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "@acrontum/boats-cli",
+    "description": "our sweet api",
+    "contact": {
+      "name": "acrontum",
+      "email": "support@acrontum.de"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ],
+  "components": {
+    "parameters": {
+      "QueryLimit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      },
+      "QueryOffset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      }
+    },
+    "schemas": {
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Starting index"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Max items returned"
+          },
+          "total": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total items available"
+          }
+        }
+      },
+      "UserDelete": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserGet": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Users": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "UserPatch": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserPut": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

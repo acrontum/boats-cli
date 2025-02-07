@@ -1,10 +1,11 @@
 import assert from 'node:assert';
-import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
 import { cli, cliArguments } from '../src/cli';
 import { trimIndent } from '../src/lib';
 import { modelCliArguments } from '../src/subcommands/model';
 import { pathCliArguments } from '../src/subcommands/path';
+import { boats, ErrorWithLogs } from './boats';
 import { getAllFiles, getFile, toArgv } from './shared';
 
 describe('e2e.spec.ts', async () => {
@@ -42,7 +43,7 @@ describe('e2e.spec.ts', async () => {
     `,
     );
 
-    content = await readFile('test/output/e2e/src/index.yml', { encoding: 'utf8' });
+    content = await getFile('test/output/e2e/src/index.yml');
     assert.equal(
       content,
       trimIndent`\
@@ -82,6 +83,33 @@ describe('e2e.spec.ts', async () => {
         }}
       `,
     );
+
+    // boats will fail here as the index points to params / schemas that don't exist
+    await mkdir('test/output/e2e/spec/', { recursive: true });
+    const error = boats('test/output/e2e/src/index.yml', 'test/output/e2e/api.json');
+    await assert.rejects(error, 'boats should fail');
+
+    const errorValue = (await error.catch((e: unknown) => e)) as ErrorWithLogs;
+    assert.strictEqual(errorValue.code, 'ERESOLVER');
+    assert.deepStrictEqual(errorValue.logs, [['Render index file 1st', 'test/output/e2e/src/index.yml'], [undefined]]);
+
+    files = await cli(toArgv(`init --all --output test/output/e2e --quiet`));
+    assert.deepStrictEqual(
+      Object.keys(files).sort(),
+      [
+        'test/output/e2e/.boatsrc',
+        'test/output/e2e/src/components/parameters/index.yml',
+        'test/output/e2e/src/components/schemas/index.yml',
+        'test/output/e2e/src/index.yml',
+        'test/output/e2e/src/paths/index.yml',
+      ],
+      'file mismatch',
+    );
+
+    await mkdir('test/output/e2e/spec/', { recursive: true });
+    const indexFile = await boats('test/output/e2e/src/index.yml', 'test/output/e2e/api.json');
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/init.json'), 'spec mismatch');
   });
 
   await it('generates files - album api', async () => {
@@ -151,6 +179,11 @@ describe('e2e.spec.ts', async () => {
       const outputFile = fixtureFile.replace('test/fixtures/e2e/gen1', 'test/output/e2e/gen1');
       assert.strictEqual(await getFile(outputFile), await getFile(fixtureFile));
     }
+
+    await mkdir('test/output/e2e/spec/', { recursive: true });
+    const indexFile = await boats('test/output/e2e/gen1/src/index.yml', 'test/output/e2e/api.json');
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/album-api.json'), 'spec mismatch');
   });
 
   await it('generates files - user api', async () => {
@@ -221,6 +254,11 @@ describe('e2e.spec.ts', async () => {
       const outputFile = fixtureFile.replace('test/fixtures/e2e/gen2', 'test/output/e2e/gen2');
       assert.strictEqual(await getFile(outputFile), await getFile(fixtureFile));
     }
+
+    await mkdir('test/output/e2e/spec/', { recursive: true });
+    const indexFile = await boats('test/output/e2e/gen2/src/index.yml', 'test/output/e2e/api.json');
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/user-api.json'), 'spec mismatch');
   });
 
   await it('should not have global short and long opt conflicts with subcommands', () => {

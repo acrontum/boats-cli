@@ -1,0 +1,630 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "@acrontum/boats-cli",
+    "description": "our sweet api",
+    "contact": {
+      "name": "acrontum",
+      "email": "support@acrontum.de"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Create a login",
+        "operationId": "authLoginPost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid login supplied"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Show logout",
+        "operationId": "authLogoutGet",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logout"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "logout not found"
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Show user verification",
+        "operationId": "authVerifyGet",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserVerification"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "user verification not found"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List users",
+        "description": "List users",
+        "operationId": "usersGet",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a user",
+        "operationId": "usersPost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid user supplied"
+          }
+        }
+      }
+    },
+    "/users/{userId}/addresses": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List addresses",
+        "description": "List addresses",
+        "operationId": "usersUserIdAddressesGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Addresses"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a address",
+        "operationId": "usersUserIdAddressesPost",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddressPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid address supplied"
+          }
+        }
+      }
+    },
+    "/users/{userId}/addresses/{addresseId}": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete address",
+        "operationId": "usersUserIdAddressesAddresseIdDelete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/PathAddresseId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "address not found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Show address",
+        "operationId": "usersUserIdAddressesAddresseIdGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/PathAddresseId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "address not found"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user",
+        "operationId": "usersUserIdDelete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "user not found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Show user",
+        "operationId": "usersUserIdGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "user not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user",
+        "operationId": "usersUserIdPatch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "user not found"
+          },
+          "422": {
+            "description": "Invalid user supplied"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PathAddresseId": {
+        "in": "path",
+        "name": "addresseId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff"
+      },
+      "PathUserId": {
+        "in": "path",
+        "name": "userId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff"
+      },
+      "QueryLimit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      },
+      "QueryOffset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      }
+    },
+    "schemas": {
+      "Address": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Addresses": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        }
+      },
+      "AddressPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Jwt": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "LoginPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Logout": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Starting index"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Max items returned"
+          },
+          "total": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total items available"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Users": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "UserPatch": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserVerification": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "@acrontum/boats-cli",
+    "description": "our sweet api",
+    "contact": {
+      "name": "acrontum",
+      "email": "support@acrontum.de"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ],
+  "paths": {
+    "/users/{userId}/photos": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List photos",
+        "description": "List photos",
+        "operationId": "usersUserIdPhotosGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Photos"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a photo",
+        "operationId": "usersUserIdPhotosPost",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhotoPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Photo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid photo supplied"
+          }
+        }
+      }
+    },
+    "/users/{userId}/photos/{photoId}": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete photo",
+        "operationId": "usersUserIdPhotosPhotoIdDelete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/PathPhotoId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "photo not found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Show photo",
+        "operationId": "usersUserIdPhotosPhotoIdGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/PathPhotoId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Photo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "photo not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update photo",
+        "operationId": "usersUserIdPhotosPhotoIdPatch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/PathPhotoId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhotoPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Photo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "photo not found"
+          },
+          "422": {
+            "description": "Invalid photo supplied"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PathPhotoId": {
+        "in": "path",
+        "name": "photoId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff"
+      },
+      "PathUserId": {
+        "in": "path",
+        "name": "userId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff"
+      },
+      "QueryLimit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      },
+      "QueryOffset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "number"
+        },
+        "description": "query param that does some stuff"
+      }
+    },
+    "schemas": {
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Starting index"
+          },
+          "limit": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Max items returned"
+          },
+          "total": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total items available"
+          }
+        }
+      },
+      "Photo": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Photos": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Photo"
+            }
+          }
+        }
+      },
+      "PhotoPatch": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "PhotoPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

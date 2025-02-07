@@ -1,8 +1,9 @@
 import assert from 'node:assert';
-import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
 import { cli } from '../src/cli';
 import { trimIndent } from '../src/lib';
+import { boats } from './boats';
 import { baseModel, getAllFiles, getFile, toArgv } from './shared';
 
 describe('model.spec.ts', async () => {
@@ -157,8 +158,9 @@ describe('model.spec.ts', async () => {
 
     assert.equal(await getFile('test/output/model/src/components/schemas/user/put.yml'), baseModel);
 
+    const indexFileContent = await getFile('test/output/model/src/index.yml');
     assert.equal(
-      await getFile('test/output/model/src/index.yml'),
+      indexFileContent,
       trimIndent`\
         openapi: "3.1.0"
         info:
@@ -196,6 +198,15 @@ describe('model.spec.ts', async () => {
         }}
       `,
     );
+
+    // boats will fail when paths index doesnt exist (it's assumed eventually it would)
+    const indexNoPaths = indexFileContent.replace('paths:\n  $ref: "paths/index.yml"', '');
+    await writeFile('test/output/model/src/index.yml', indexNoPaths, { encoding: 'utf8' });
+
+    await mkdir('test/output/model/spec/', { recursive: true });
+    let indexFile = await boats('test/output/model/src/index.yml', 'test/output/model/spec/api.json', false);
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/model.json'), 'spec mismatch');
 
     files = await cli(toArgv('model user -crudlP --output test/output/model --quiet'));
     assert.deepStrictEqual(
@@ -239,6 +250,13 @@ describe('model.spec.ts', async () => {
       ],
       'files mismatch',
     );
+
+    await writeFile('test/output/model/src/index.yml', indexNoPaths, { encoding: 'utf8' });
+
+    await mkdir('test/output/model/spec/', { recursive: true });
+    indexFile = await boats('test/output/model/src/index.yml', 'test/output/model/spec/api.json', false);
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/model.json'), 'spec mismatch');
   });
 
   await it('generates the correct model files', async () => {
@@ -426,6 +444,18 @@ describe('model.spec.ts', async () => {
   });
 
   await it('handles different naming patterns', async () => {
+    const assertSpecCompiled = async (): Promise<void> => {
+      const indexFileContent = await getFile('test/output/model/src/index.yml');
+      // boats will fail when paths index doesnt exist (it's assumed eventually it would)
+      const indexNoPaths = indexFileContent.replace('paths:\n  $ref: "paths/index.yml"', '');
+      await writeFile('test/output/model/src/index.yml', indexNoPaths, { encoding: 'utf8' });
+
+      await mkdir('test/output/model/spec/', { recursive: true });
+      const indexFile = await boats('test/output/model/src/index.yml', 'test/output/model/spec/api.json', false);
+      assert.strictEqual(indexFile !== '', true, 'boats failed');
+      assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/model-naming.json'), 'spec mismatch');
+    };
+
     let files = await cli(toArgv('model userModel --list --output test/output/model --quiet'));
     assert.deepStrictEqual(
       Object.keys(files).sort(),
@@ -442,6 +472,7 @@ describe('model.spec.ts', async () => {
       ],
       'files mismatch',
     );
+    await assertSpecCompiled();
 
     files = await cli(toArgv('model user-model --list --output test/output/model --quiet'));
     assert.deepStrictEqual(
@@ -459,6 +490,7 @@ describe('model.spec.ts', async () => {
       ],
       'files mismatch',
     );
+    await assertSpecCompiled();
 
     files = await cli(toArgv('model UserModel --list --output test/output/model --quiet'));
     assert.deepStrictEqual(
@@ -476,6 +508,7 @@ describe('model.spec.ts', async () => {
       ],
       'files mismatch',
     );
+    await assertSpecCompiled();
 
     files = await cli(['model', 'user model', '--list', '--output', 'test/output/model', '--quiet']);
     assert.deepStrictEqual(
@@ -493,6 +526,7 @@ describe('model.spec.ts', async () => {
       ],
       'files mismatch',
     );
+    await assertSpecCompiled();
   });
 
   await it('does not overwrite existing files', async () => {

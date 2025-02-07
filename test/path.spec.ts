@@ -1,9 +1,10 @@
 import assert from 'node:assert';
-import { readdir, rm } from 'node:fs/promises';
+import { mkdir, readdir, rm } from 'node:fs/promises';
 import { beforeEach, describe, it } from 'node:test';
 import { cli } from '../src/cli';
 import { trimIndent } from '../src/lib';
 import { getBoatsRc, getIndex } from '../src/templates/init';
+import { boats } from './boats';
 import { baseModel, getAllFiles, getFile, toArgv } from './shared';
 
 describe('path.spec.ts', async () => {
@@ -341,6 +342,11 @@ describe('path.spec.ts', async () => {
                   $ref: "../../../components/schemas/user/model.yml"
       `,
     );
+
+    await mkdir('test/output/path/spec/', { recursive: true });
+    const indexFile = await boats('test/output/path/src/index.yml', 'test/output/path/spec/api.json');
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/path.json'), 'spec mismatch');
   });
 
   await it('accepts deep paths', async () => {
@@ -586,6 +592,11 @@ describe('path.spec.ts', async () => {
                   $ref: "../../../../../components/schemas/photo/model.yml"
       `,
     );
+
+    await mkdir('test/output/path/spec/', { recursive: true });
+    const indexFile = await boats('test/output/path/src/index.yml', 'test/output/path/spec/api.json');
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/path-deep.json'), 'spec mismatch');
   });
 
   await it('can skip generating models', async () => {

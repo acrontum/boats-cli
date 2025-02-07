@@ -20,7 +20,7 @@
     "docs": "npm run docs-readme && npm run docs-changelog",
     "docs-readme": "npx doctoc --github readme.md && sed -i 's/%5C_/_/g' readme.md",
     "docs-changelog": "npx auto-changelog --output changelog.md --commit-limit false --sort-commits date --hide-empty-releases --ignore-commit-pattern 'release' --breaking-pattern 'breaking change: '",
-    "test": "node -r source-map-support/register --test"
+    "test": "node -r source-map-support/register --test dist/test/*.spec.js"
   },
   "keywords": [],
   "author": "",
@@ -28,11 +28,15 @@
   "devDependencies": {
     "@acrontum/eslint-config": "^1.2.1",
     "@tsconfig/node22": "^22.0.0",
-    "@types/node": "^20.12.7",
-    "auto-changelog": "^2.4.0",
+    "@types/node": "^22.13.1",
+    "auto-changelog": "^2.5.0",
+    "boats": "5.1.1",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "whatwg-url": "13"
   },
   "files": [
     "readme.md",
