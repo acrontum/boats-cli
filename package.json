@@ -29,6 +29,7 @@
     "@acrontum/eslint-config": "^1.2.1",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.13.1",
+    "@types/nunjucks": "^3.2.6",
     "auto-changelog": "^2.5.0",
     "boats": "5.1.1",
     "prettier": "^3.4.2",
