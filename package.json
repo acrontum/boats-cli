@@ -36,7 +36,8 @@
     "typescript": "^5.4.5"
   },
   "overrides": {
-    "whatwg-url": "13"
+    "whatwg-url": ">= 13",
+    "jsonpath-plus": ">= 10.3.0"
   },
   "files": [
     "readme.md",

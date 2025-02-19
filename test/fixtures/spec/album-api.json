@@ -65,7 +65,7 @@
             }
           },
           "404": {
-            "description": "album not found"
+            "description": "Album not found"
           }
         }
       }
@@ -154,7 +154,7 @@
             "description": "Deleted"
           },
           "404": {
-            "description": "song not found"
+            "description": "Song not found"
           }
         }
       },
@@ -184,7 +184,7 @@
             }
           },
           "404": {
-            "description": "song not found"
+            "description": "Song not found"
           }
         }
       },
@@ -224,7 +224,7 @@
             }
           },
           "404": {
-            "description": "song not found"
+            "description": "Song not found"
           },
           "422": {
             "description": "Invalid song supplied"
@@ -285,7 +285,7 @@
             }
           },
           "404": {
-            "description": "refresh token not found"
+            "description": "Refresh token not found"
           }
         }
       }
@@ -309,7 +309,7 @@
             }
           },
           "404": {
-            "description": "verify not found"
+            "description": "Verify not found"
           }
         }
       }

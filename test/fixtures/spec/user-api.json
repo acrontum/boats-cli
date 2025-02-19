@@ -72,7 +72,7 @@
             }
           },
           "404": {
-            "description": "logout not found"
+            "description": "Logout not found"
           }
         }
       }
@@ -96,7 +96,7 @@
             }
           },
           "404": {
-            "description": "user verification not found"
+            "description": "User verification not found"
           }
         }
       }
@@ -239,7 +239,7 @@
             "description": "Deleted"
           },
           "404": {
-            "description": "address not found"
+            "description": "Address not found"
           }
         }
       },
@@ -269,7 +269,7 @@
             }
           },
           "404": {
-            "description": "address not found"
+            "description": "Address not found"
           }
         }
       }
@@ -291,7 +291,7 @@
             "description": "Deleted"
           },
           "404": {
-            "description": "user not found"
+            "description": "User not found"
           }
         }
       },
@@ -318,7 +318,7 @@
             }
           },
           "404": {
-            "description": "user not found"
+            "description": "User not found"
           }
         }
       },
@@ -355,7 +355,7 @@
             }
           },
           "404": {
-            "description": "user not found"
+            "description": "User not found"
           },
           "422": {
             "description": "Invalid user supplied"
