@@ -5,14 +5,14 @@ required:
   - "total"
 properties:
   offset:
-    type: "number"
+    type: "integer"
     minimum: 0
     description: "Starting index"
   limit:
-    type: "number"
+    type: "integer"
     minimum: 0
     description: "Max items returned"
   total:
-    type: "number"
+    type: "integer"
     minimum: 0
     description: "Total items available"

@@ -54,9 +54,9 @@ export const getPaginationModel = (): string => {
     type: 'object',
     required: ['offset', 'limit', 'total'],
     properties: {
-      offset: { type: 'number', minimum: 0, description: 'Starting index' },
-      limit: { type: 'number', minimum: 0, description: 'Max items returned' },
-      total: { type: 'number', minimum: 0, description: 'Total items available' },
+      offset: { type: 'integer', minimum: 0, description: 'Starting index' },
+      limit: { type: 'integer', minimum: 0, description: 'Max items returned' },
+      total: { type: 'integer', minimum: 0, description: 'Total items available' },
     },
   });
 };

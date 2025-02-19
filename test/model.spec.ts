@@ -86,7 +86,7 @@ describe('model.spec.ts', async () => {
         name: "limit"
         required: false
         schema:
-          type: "number"
+          type: "integer"
         description: "query param that does some stuff"
       `,
     );
@@ -98,7 +98,7 @@ describe('model.spec.ts', async () => {
         name: "offset"
         required: false
         schema:
-          type: "number"
+          type: "integer"
         description: "query param that does some stuff"
       `,
     );
@@ -115,15 +115,15 @@ describe('model.spec.ts', async () => {
           - "total"
         properties:
           offset:
-            type: "number"
+            type: "integer"
             minimum: 0
             description: "Starting index"
           limit:
-            type: "number"
+            type: "integer"
             minimum: 0
             description: "Max items returned"
           total:
-            type: "number"
+            type: "integer"
             minimum: 0
             description: "Total items available"
       `,
