@@ -1,6 +1,6 @@
 {
   "name": "@acrontum/boats-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI that generates boats projects, paths, schemas and queries",
   "main": "dist/src/cli.js",
   "repository": {
@@ -31,8 +31,8 @@
     "@types/node": "^22.13.1",
     "@types/nunjucks": "^3.2.6",
     "auto-changelog": "^2.5.0",
-    "boats": "5.1.1",
-    "prettier": "^3.4.2",
+    "boats": "^5.1.2",
+    "prettier": "^3.5.1",
     "source-map-support": "^0.5.21",
     "typescript": "^5.4.5"
   },
