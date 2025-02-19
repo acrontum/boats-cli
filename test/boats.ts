@@ -2,6 +2,7 @@ import { default as template } from 'boats/build/src/Template';
 import { default as bundlerSwaggerParse } from 'boats/build/src/bundlerSwaggerParse';
 import { BoatsRC } from 'boats/build/src/interfaces/BoatsRc';
 import { dirname } from 'path';
+import pj from '../package.json';
 
 export type ErrorWithLogs = Error & { code: string; logs: unknown[] };
 
@@ -50,8 +51,33 @@ const mockConsoleLog = (): ConsoleMock => {
   /* eslint-enable no-console */
 };
 
+let overridden = false;
+// force package json helper to return 1.0.0 for 'version'
+const overridePackageJsonReader = (): void => {
+  if (overridden) {
+    return;
+  }
+  overridden = true;
+
+  const original = template.setupDefaultNunjucksEnv.bind(template);
+  template.setupDefaultNunjucksEnv = (): ReturnType<typeof template.setupDefaultNunjucksEnv> => {
+    const env = original();
+
+    env.addGlobal('packageJson', (value: string): unknown => {
+      if (value === 'version') {
+        return '1.0.0';
+      }
+      return pj[value as keyof typeof pj] || '';
+    });
+
+    return env;
+  };
+};
+
 export const boats = async (inFile: string, outFile: string, validate = true): Promise<string> => {
   const trim = dirname(inFile) + '/paths/';
+
+  overridePackageJsonReader();
   // overwrite console during testing - no debug output needed
   const con = mockConsoleLog();
 
