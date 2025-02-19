@@ -130,8 +130,8 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
   if (options.list || options.crud) {
     tasks.push(
       { contents: () => getModels(paginationRef), filename: `src/components/schemas/${dashName}/models.yml` },
-      { contents: () => getParam('limit', 'query', 'number'), filename: `src/components/parameters/queryLimit.yml` },
-      { contents: () => getParam('offset', 'query', 'number'), filename: `src/components/parameters/queryOffset.yml` },
+      { contents: () => getParam('limit', 'query', 'integer'), filename: `src/components/parameters/queryLimit.yml` },
+      { contents: () => getParam('offset', 'query', 'integer'), filename: `src/components/parameters/queryOffset.yml` },
       { contents: () => getPaginationModel(), filename: `src/components/schemas/pagination/model.yml` },
     );
   }

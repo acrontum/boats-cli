@@ -193,9 +193,13 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const paramRefs = mapParamRefs(otherPathParams, dirname(filename), options.rootRef);
 
     tasks.push(
-      { contents: () => getParam('limit', 'query', 'number'), filename: `src/components/parameters/queryLimit.yml`, generate: !options['no-models'] },
       {
-        contents: () => getParam('offset', 'query', 'number'),
+        contents: () => getParam('limit', 'query', 'integer'),
+        filename: `src/components/parameters/queryLimit.yml`,
+        generate: !options['no-models'],
+      },
+      {
+        contents: () => getParam('offset', 'query', 'integer'),
         filename: 'src/components/parameters/queryOffset.yml',
         generate: !options['no-models'],
       },

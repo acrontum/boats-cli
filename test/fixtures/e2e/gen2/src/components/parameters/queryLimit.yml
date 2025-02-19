@@ -2,5 +2,5 @@ in: "query"
 name: "limit"
 required: false
 schema:
-  type: "number"
+  type: "integer"
 description: "query param that does some stuff"
