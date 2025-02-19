@@ -103,7 +103,7 @@
             "description": "Deleted"
           },
           "404": {
-            "description": "photo not found"
+            "description": "Photo not found"
           }
         }
       },
@@ -133,7 +133,7 @@
             }
           },
           "404": {
-            "description": "photo not found"
+            "description": "Photo not found"
           }
         }
       },
@@ -173,7 +173,7 @@
             }
           },
           "404": {
-            "description": "photo not found"
+            "description": "Photo not found"
           },
           "422": {
             "description": "Invalid photo supplied"

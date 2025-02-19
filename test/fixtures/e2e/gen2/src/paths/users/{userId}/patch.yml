@@ -9,7 +9,7 @@ requestBody:
         $ref: "../../../components/schemas/user/patch.yml"
 responses:
   "404":
-    description: "user not found"
+    description: "User not found"
   "422":
     description: "Invalid user supplied"
   "200":

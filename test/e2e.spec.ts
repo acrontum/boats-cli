@@ -407,7 +407,7 @@ describe('e2e.spec.ts', async () => {
           - $ref: "#/components/parameters/PathUserId"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "200":
             description: "Success"
             content:
@@ -432,7 +432,7 @@ describe('e2e.spec.ts', async () => {
                 $ref: "#/components/schemas/UserPatch"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "422":
             description: "Invalid user supplied"
           "200":
@@ -497,7 +497,7 @@ describe('e2e.spec.ts', async () => {
           - $ref: "#/components/parameters/PathPhotoId"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "200":
             description: "Success"
             content:
@@ -523,7 +523,7 @@ describe('e2e.spec.ts', async () => {
                 $ref: "#/components/schemas/PhotoPatch"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "422":
             description: "Invalid photo supplied"
           "200":
@@ -656,7 +656,7 @@ describe('e2e.spec.ts', async () => {
           - $ref: "#/components/parameters/PathUserId"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "200":
             description: "Success"
             content:
@@ -681,7 +681,7 @@ describe('e2e.spec.ts', async () => {
                 $ref: "#/components/schemas/UserPatch"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "422":
             description: "Invalid user supplied"
           "200":
@@ -746,7 +746,7 @@ describe('e2e.spec.ts', async () => {
           - $ref: "#/components/parameters/PathPhotoId"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "200":
             description: "Success"
             content:
@@ -772,7 +772,7 @@ describe('e2e.spec.ts', async () => {
                 $ref: "#/components/schemas/PhotoPatch"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "422":
             description: "Invalid photo supplied"
           "200":

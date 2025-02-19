@@ -1,7 +1,7 @@
 summary: "Show user verification"
 responses:
   "404":
-    description: "user verification not found"
+    description: "User verification not found"
   "200":
     description: "Success"
     content:

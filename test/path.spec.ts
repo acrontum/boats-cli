@@ -263,7 +263,7 @@ describe('path.spec.ts', async () => {
           - $ref: "../../../components/parameters/pathUserId.yml"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "204":
             description: "Deleted"
       `,
@@ -277,7 +277,7 @@ describe('path.spec.ts', async () => {
           - $ref: "../../../components/parameters/pathUserId.yml"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "200":
             description: "Success"
             content:
@@ -301,7 +301,7 @@ describe('path.spec.ts', async () => {
                 $ref: "../../../components/schemas/user/patch.yml"
         responses:
           "404":
-            description: "user not found"
+            description: "User not found"
           "422":
             description: "Invalid user supplied"
           "200":
@@ -541,7 +541,7 @@ describe('path.spec.ts', async () => {
           - $ref: "../../../../../components/parameters/pathPhotoId.yml"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "204":
             description: "Deleted"
       `,
@@ -556,7 +556,7 @@ describe('path.spec.ts', async () => {
           - $ref: "../../../../../components/parameters/pathPhotoId.yml"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "200":
             description: "Success"
             content:
@@ -581,7 +581,7 @@ describe('path.spec.ts', async () => {
                 $ref: "../../../../../components/schemas/photo/patch.yml"
         responses:
           "404":
-            description: "photo not found"
+            description: "Photo not found"
           "422":
             description: "Invalid photo supplied"
           "200":

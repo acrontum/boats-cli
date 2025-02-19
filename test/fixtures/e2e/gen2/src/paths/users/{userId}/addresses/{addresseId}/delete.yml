@@ -4,6 +4,6 @@ parameters:
   - $ref: "../../../../../components/parameters/pathAddresseId.yml"
 responses:
   "404":
-    description: "address not found"
+    description: "Address not found"
   "204":
     description: "Deleted"

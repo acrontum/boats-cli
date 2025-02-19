@@ -1,7 +1,7 @@
 summary: "Show refresh token"
 responses:
   "404":
-    description: "refresh token not found"
+    description: "Refresh token not found"
   "200":
     description: "Success"
     content:

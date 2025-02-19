@@ -3,6 +3,6 @@ parameters:
   - $ref: "../../../components/parameters/pathUserId.yml"
 responses:
   "404":
-    description: "user not found"
+    description: "User not found"
   "204":
     description: "Deleted"

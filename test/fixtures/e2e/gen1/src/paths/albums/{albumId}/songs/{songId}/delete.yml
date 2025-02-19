@@ -4,6 +4,6 @@ parameters:
   - $ref: "../../../../../components/parameters/pathSongId.yml"
 responses:
   "404":
-    description: "song not found"
+    description: "Song not found"
   "204":
     description: "Deleted"

@@ -1,4 +1,4 @@
-import { dashCase, toYaml } from '../lib';
+import { capitalize, dashCase, toYaml } from '../lib';
 
 export const getPathIndex = (): string => '{{ autoPathIndexer() }}\n';
 
@@ -60,7 +60,7 @@ export const getShow = (singularName: string, responseSchemaRef: string, paramet
     ...(parameters?.length ? { parameters } : {}),
     responses: {
       '"404"': {
-        description: `${spaceName} not found`,
+        description: `${capitalize(spaceName)} not found`,
       },
       '"200"': {
         description: 'Success',
@@ -82,7 +82,7 @@ export const getDelete = (singularName: string, parameters?: { $ref: string }[])
     ...(parameters?.length ? { parameters } : {}),
     responses: {
       '"404"': {
-        description: `${spaceName} not found`,
+        description: `${capitalize(spaceName)} not found`,
       },
       '"204"': {
         description: 'Deleted',
@@ -107,7 +107,7 @@ export const getUpdate = (singularName: string, requestSchemaRef: string, respon
     },
     responses: {
       '"404"': {
-        description: `${spaceName} not found`,
+        description: `${capitalize(spaceName)} not found`,
       },
       '"422"': {
         description: `Invalid ${spaceName} supplied`,
