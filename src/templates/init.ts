@@ -1,3 +1,4 @@
+import { GlobalOptions } from '../cli';
 import { toYaml } from '../lib';
 
 const autoTagOpid = `
@@ -15,23 +16,27 @@ const autoTagOpid = `
   ])
 }}`;
 
-export const getIndex = (): string => {
-  const yaml = toYaml({
-    openapi: '3.1.0',
-    info: {
-      version: "{{ packageJson('version') }}",
-      title: "{{ packageJson('name') }}",
-      description: 'our sweet api',
-      contact: { name: 'acrontum', email: 'support@acrontum.de' },
-      license: { name: 'Apache 2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0.html' },
+export const getIndex = (globalOptions: GlobalOptions): string => {
+  const yaml = toYaml(
+    {
+      openapi: '3.1.0',
+      info: {
+        version: "{{ packageJson('version') }}",
+        title: "{{ packageJson('name') }}",
+        description: 'our sweet api',
+        contact: { name: 'acrontum', email: 'support@acrontum.de' },
+        license: { name: 'Apache 2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0.html' },
+      },
+      servers: [{ url: '/v1' }],
+      paths: { $ref: 'paths/index.yml' },
+      components: {
+        parameters: { $ref: 'components/parameters/index.yml' },
+        schemas: { $ref: 'components/schemas/index.yml' },
+      },
     },
-    servers: [{ url: '/v1' }],
-    paths: { $ref: 'paths/index.yml' },
-    components: {
-      parameters: { $ref: 'components/parameters/index.yml' },
-      schemas: { $ref: 'components/schemas/index.yml' },
-    },
-  });
+    true,
+    !globalOptions['no-quote'],
+  );
 
   return `${yaml}${autoTagOpid}\n`;
 };

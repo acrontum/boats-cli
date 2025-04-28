@@ -17,7 +17,7 @@ export const getAllFiles = (path: string): Promise<string[]> =>
 
     return files.sort();
   });
-export const baseModel = getModel();
+export const baseModel = getModel({});
 export const getFile = (file: string): Promise<string> => readFile(file, { encoding: 'utf8' });
 
 export const getLogger = (): (() => void) => {
