@@ -54,9 +54,15 @@ export const createFile = async (path: string, content: string, force = false): 
   return true;
 };
 
-export const toYaml = (object: Json, trailingNewline = true): string => {
+/**
+ * YAML string rules are non-trivial - only set quoteProps=false when you know
+ * there is no chance of invalid unquoted strings.
+ *
+ * see https://stackoverflow.com/a/22235064 and the comments with it.
+ */
+export const toYaml = (object: Json, trailingNewline = true, quoteProps = true): string => {
   const out: string[] = [];
-  toYamlRecurse(object, out, 0);
+  toYamlRecurse(object, out, 0, Array.isArray(object), quoteProps);
 
   if (trailingNewline) {
     out.push('');
@@ -65,7 +71,7 @@ export const toYaml = (object: Json, trailingNewline = true): string => {
   return out.join('\n');
 };
 
-const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, isArray = false): void => {
+const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, isArray = false, quoteProps = true): void => {
   const prevIndent = depth ? ' '.repeat((depth - 1) * 2) : '';
 
   if (typeof object === 'object' && object !== null) {
@@ -78,13 +84,13 @@ const toYamlRecurse = (object: Json | Json[string], out: string[], depth = 0, is
       } else {
         out.push(`${' '.repeat(depth * 2)}${key}:`);
       }
-      toYamlRecurse((object as Json)[key], out, depth + 1, Array.isArray(object));
+      toYamlRecurse((object as Json)[key], out, depth + 1, Array.isArray(object), quoteProps);
     }
     return;
   }
 
   if (typeof object === 'string') {
-    object = `"${object.replace(/\"/g, '\\"')}"`;
+    object = quoteProps ? `"${object.replace(/\"/g, '\\"')}"` : object;
   }
 
   if (isArray) {

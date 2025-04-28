@@ -17,6 +17,7 @@ export type GlobalOptions = {
   force?: boolean;
   'no-index'?: boolean;
   'no-init'?: boolean;
+  'no-quote'?: boolean;
   output?: string;
   quiet?: boolean;
   verbose?: boolean;
@@ -49,6 +50,12 @@ export const cliArguments: Record<string, CliArg> = {
   force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
   'no-index': { type: 'boolean', short: 'I', [description]: 'Skip auto-creating index files, only models' },
   'no-init': { type: 'boolean', short: 'N', [description]: 'Skip auto-creating init files' },
+  'no-quote': {
+    type: 'boolean',
+    short: 'Q',
+    [description]:
+      'Remove quotes around string values. Note that this is not guaranteed to output a valid value as YAML string rules are non-trivial, so use at your own discretion.',
+  },
   output: { type: 'string', short: 'o', [argname]: 'OUTPUT_DIR', [description]: 'Location to output files to (defaults to current folder)' },
   quiet: { type: 'boolean', short: 'q', [description]: 'Only output errors' },
   verbose: { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
@@ -260,7 +267,7 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
   }
 
   if (!globalOptions['no-init']) {
-    tasks.push({ contents: getIndex, filename: 'src/index.yml' }, { contents: getBoatsRc, filename: '.boatsrc' });
+    tasks.push({ contents: () => getIndex(globalOptions), filename: 'src/index.yml' }, { contents: getBoatsRc, filename: '.boatsrc' });
   }
 
   if (!tasks.length) {

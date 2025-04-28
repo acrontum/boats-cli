@@ -7,6 +7,7 @@ import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '.
 
 type PathGenerationOptions = {
   name: string;
+  globalOptions: GlobalOptions;
   'no-models'?: boolean;
   model?: string;
   type?: string;
@@ -16,7 +17,6 @@ type PathGenerationOptions = {
   patch?: boolean;
   post?: boolean;
   put?: boolean;
-  rootRef?: string;
 };
 
 export const pathCliArguments: Record<string, CliArg> = {
@@ -127,7 +127,7 @@ export const parsePathCommand: SubcommandGenerator = (args: string[], globalOpti
     return help(1, `invalid path arg "${name}"`);
   }
 
-  const tasks = getPathTasks({ ...parsed.values, rootRef: globalOptions['root-ref'], name });
+  const tasks = getPathTasks({ ...parsed.values, globalOptions, name });
 
   if (!tasks.length) {
     return help(1, 'Error: Nothing to do. Aborting. Did you forget crud options (eg --get)?');
@@ -140,6 +140,7 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
   const pathParams: { rootRef: string; srcRef: string }[] = [];
   let lastIsParam = false;
   const tasks: GenerationTask[] = [];
+  const rootRef = options.globalOptions['root-ref'];
 
   const parts = options.name.split('/').filter(Boolean);
   for (let i = 0; i < parts.length; ++i) {
@@ -152,7 +153,7 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     if (pathParam) {
       lastIsParam = true;
       tasks.push({
-        contents: () => getParam(pathParam, 'path'),
+        contents: () => getParam(options.globalOptions, pathParam, 'path'),
         filename: `src/components/parameters/path${capitalize(pathParam)}.yml`,
         generate: !options['no-models'],
       });
@@ -181,32 +182,40 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
   const dashName = dashCase(singleModelName);
   const singularName = camelCase(singleModelName);
 
-  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.rootRef);
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', rootRef);
 
   if (options.list) {
     const filename = `src/paths/${normalizedBaseFilepath}/get.yml`;
     const listSchemaRef = getRootRef(
       relative(`src/paths/${normalizedBaseFilepath}`, `src/components/schemas/${dashName}/models.yml`),
       `#/components/schemas/${capitalize(singleModelName)}Models`,
-      options.rootRef,
+      rootRef,
     );
-    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), rootRef);
 
     tasks.push(
       {
-        contents: () => getParam('limit', 'query', 'integer'),
+        contents: () => getParam(options.globalOptions, 'limit', 'query', 'integer'),
         filename: `src/components/parameters/queryLimit.yml`,
         generate: !options['no-models'],
       },
       {
-        contents: () => getParam('offset', 'query', 'integer'),
+        contents: () => getParam(options.globalOptions, 'offset', 'query', 'integer'),
         filename: 'src/components/parameters/queryOffset.yml',
         generate: !options['no-models'],
       },
-      { contents: getPaginationModel, filename: 'src/components/schemas/pagination/model.yml', generate: !options['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: () => getModels(paginationRef), filename: `src/components/schemas/${dashName}/models.yml`, generate: !options['no-models'] },
-      { contents: () => getList(customModelName, listSchemaRef, paramRefs), filename },
+      {
+        contents: () => getPaginationModel(options.globalOptions),
+        filename: 'src/components/schemas/pagination/model.yml',
+        generate: !options['no-models'],
+      },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      {
+        contents: () => getModels(options.globalOptions, paginationRef),
+        filename: `src/components/schemas/${dashName}/models.yml`,
+        generate: !options['no-models'],
+      },
+      { contents: () => getList(options.globalOptions, customModelName, listSchemaRef, paramRefs), filename },
     );
   }
 
@@ -215,19 +224,19 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const postRequestRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/post.yml`),
       `#/components/schemas/${capitalize(singularName)}Post`,
-      options.rootRef,
+      rootRef,
     );
     const postResponseRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
       `#/components/schemas/${capitalize(singularName)}Model`,
-      options.rootRef,
+      rootRef,
     );
-    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(otherPathParams, dirname(filename), rootRef);
 
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/post.yml`, generate: !options['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: () => getCreate(singularName, postRequestRef, postResponseRef, paramRefs), filename },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/post.yml`, generate: !options['no-models'] },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: () => getCreate(options.globalOptions, singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
 
@@ -236,21 +245,21 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const postResponseRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
       `#/components/schemas/${capitalize(singularName)}Model`,
-      options.rootRef,
+      rootRef,
     );
-    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), rootRef);
 
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: () => getShow(singularName, postResponseRef, paramRefs), filename },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: () => getShow(options.globalOptions, singularName, postResponseRef, paramRefs), filename },
     );
   }
 
   if (options.delete) {
     const filename = `src/paths/${normalizedFilepath}/delete.yml`;
-    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), rootRef);
 
-    tasks.push({ contents: () => getDelete(singularName, paramRefs), filename });
+    tasks.push({ contents: () => getDelete(options.globalOptions, singularName, paramRefs), filename });
   }
 
   if (options.patch) {
@@ -258,19 +267,19 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const postRequestRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/patch.yml`),
       `#/components/schemas/${capitalize(singularName)}Patch`,
-      options.rootRef,
+      rootRef,
     );
     const postResponseRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
       `#/components/schemas/${capitalize(singularName)}Model`,
-      options.rootRef,
+      rootRef,
     );
-    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), rootRef);
 
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/patch.yml`, generate: !options['no-models'] },
-      { contents: () => getUpdate(singularName, postRequestRef, postResponseRef, paramRefs), filename },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/patch.yml`, generate: !options['no-models'] },
+      { contents: () => getUpdate(options.globalOptions, singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
 
@@ -279,19 +288,19 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const postRequestRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/put.yml`),
       `#/components/schemas/${capitalize(singularName)}Put`,
-      options.rootRef,
+      rootRef,
     );
     const postResponseRef = getRootRef(
       relative(dirname(filename), `src/components/schemas/${dashName}/model.yml`),
       `#/components/schemas/${capitalize(singularName)}Model`,
-      options.rootRef,
+      rootRef,
     );
-    const paramRefs = mapParamRefs(pathParams, dirname(filename), options.rootRef);
+    const paramRefs = mapParamRefs(pathParams, dirname(filename), rootRef);
 
     tasks.push(
-      { contents: getModel, filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
-      { contents: getModel, filename: `src/components/schemas/${dashName}/put.yml`, generate: !options['no-models'] },
-      { contents: () => getReplace(singularName, postRequestRef, postResponseRef, paramRefs), filename },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/model.yml`, generate: !options['no-models'] },
+      { contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/put.yml`, generate: !options['no-models'] },
+      { contents: () => getReplace(options.globalOptions, singularName, postRequestRef, postResponseRef, paramRefs), filename },
     );
   }
 

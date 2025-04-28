@@ -811,4 +811,487 @@ describe('e2e.spec.ts', async () => {
       assert.strictEqual(await getFile(file.replace('/root-ref-off/', '/root-ref-base/')), await getFile(file), 'content mismatch');
     }
   });
+
+  await it('can generate an api without quoted yaml values', async () => {
+    const files = await cli(
+      toArgv(`
+      path users/:userId -crudl
+      path users/:userId/photos/:photoId -crudl
+      --quiet
+      --no-quote
+      --output test/output/e2e/quotes
+    `),
+    );
+
+    assert.deepStrictEqual(
+      Object.keys(files).sort(),
+      [
+        'test/output/e2e/quotes/.boatsrc',
+        'test/output/e2e/quotes/src/components/parameters/index.yml',
+        'test/output/e2e/quotes/src/components/parameters/pathPhotoId.yml',
+        'test/output/e2e/quotes/src/components/parameters/pathUserId.yml',
+        'test/output/e2e/quotes/src/components/parameters/queryLimit.yml',
+        'test/output/e2e/quotes/src/components/parameters/queryOffset.yml',
+        'test/output/e2e/quotes/src/components/schemas/index.yml',
+        'test/output/e2e/quotes/src/components/schemas/pagination/model.yml',
+        'test/output/e2e/quotes/src/components/schemas/photo/model.yml',
+        'test/output/e2e/quotes/src/components/schemas/photo/models.yml',
+        'test/output/e2e/quotes/src/components/schemas/photo/patch.yml',
+        'test/output/e2e/quotes/src/components/schemas/photo/post.yml',
+        'test/output/e2e/quotes/src/components/schemas/user/model.yml',
+        'test/output/e2e/quotes/src/components/schemas/user/models.yml',
+        'test/output/e2e/quotes/src/components/schemas/user/patch.yml',
+        'test/output/e2e/quotes/src/components/schemas/user/post.yml',
+        'test/output/e2e/quotes/src/index.yml',
+        'test/output/e2e/quotes/src/paths/index.yml',
+        'test/output/e2e/quotes/src/paths/users/get.yml',
+        'test/output/e2e/quotes/src/paths/users/post.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/delete.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/get.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/patch.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/photos/get.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/photos/post.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/delete.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/get.yml',
+        'test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/patch.yml',
+      ],
+      'file mismatch',
+    );
+
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/.boatsrc'),
+      trimIndent`\
+        {
+          "picomatchOptions": {
+            "bash": true
+          },
+          "fancyPluralization": true,
+          "paths": {}
+        }
+      `,
+    );
+    assert.strictEqual(await getFile('test/output/e2e/quotes/src/components/parameters/index.yml'), '{{ autoComponentIndexer() }}\n');
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/parameters/pathPhotoId.yml'),
+      trimIndent`\
+        in: path
+        name: photoId
+        required: true
+        schema:
+          type: string
+        description: path param that does some stuff
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/parameters/pathUserId.yml'),
+      trimIndent`\
+        in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+        description: path param that does some stuff
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/parameters/queryLimit.yml'),
+      trimIndent`\
+        in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+        description: query param that does some stuff
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/parameters/queryOffset.yml'),
+      trimIndent`\
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        description: query param that does some stuff
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/pagination/model.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - offset
+          - limit
+          - total
+        properties:
+          offset:
+            type: integer
+            minimum: 0
+            description: Starting index
+          limit:
+            type: integer
+            minimum: 0
+            description: Max items returned
+          total:
+            type: integer
+            minimum: 0
+            description: Total items available
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/photo/model.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/photo/models.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - meta
+          - data
+        properties:
+          meta:
+            $ref: ../pagination/model.yml
+          data:
+            type: array
+            items:
+              $ref: ./model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/photo/patch.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/photo/post.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/user/model.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/user/models.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - meta
+          - data
+        properties:
+          meta:
+            $ref: ../pagination/model.yml
+          data:
+            type: array
+            items:
+              $ref: ./model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/user/patch.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/components/schemas/user/post.yml'),
+      trimIndent`\
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: Name of the thing, separated by dashes (-)
+            example: this-is-an-example
+            minLength: 1
+            pattern: \\\\S
+            nullable: true
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/index.yml'),
+      trimIndent`\
+        openapi: 3.1.0
+        info:
+          version: {{ packageJson('version') }}
+          title: {{ packageJson('name') }}
+          description: our sweet api
+          contact:
+            name: acrontum
+            email: support@acrontum.de
+          license:
+            name: Apache 2.0
+            url: https://www.apache.org/licenses/LICENSE-2.0.html
+        servers:
+          - url: /v1
+        paths:
+          $ref: paths/index.yml
+        components:
+          parameters:
+            $ref: components/parameters/index.yml
+          schemas:
+            $ref: components/schemas/index.yml
+
+        {{
+          inject([
+            {
+              toAllOperations: {
+                content: "
+                  tags:
+                    - {{ autoTag() }}
+                  operationId: {{ uniqueOpId() }}
+                "
+              }
+            }
+          ])
+        }}
+      `,
+    );
+    assert.strictEqual(await getFile('test/output/e2e/quotes/src/paths/index.yml'), trimIndent`{{ autoPathIndexer() }}\n`);
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/get.yml'),
+      trimIndent`\
+        summary: List users
+        description: List users
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../components/schemas/user/models.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/post.yml'),
+      trimIndent`\
+        summary: Create a user
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ../../components/schemas/user/post.yml
+        responses:
+          "422":
+            description: Invalid user supplied
+          "201":
+            description: Created
+            content:
+              application/json:
+                schema:
+                  $ref: ../../components/schemas/user/model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/delete.yml'),
+      trimIndent`\
+        summary: Delete user
+        parameters:
+          - $ref: ../../../components/parameters/pathUserId.yml
+        responses:
+          "404":
+            description: User not found
+          "204":
+            description: Deleted
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/get.yml'),
+      trimIndent`\
+        summary: Show user
+        parameters:
+          - $ref: ../../../components/parameters/pathUserId.yml
+        responses:
+          "404":
+            description: User not found
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../components/schemas/user/model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/patch.yml'),
+      trimIndent`\
+        summary: Update user
+        parameters:
+          - $ref: ../../../components/parameters/pathUserId.yml
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ../../../components/schemas/user/patch.yml
+        responses:
+          "404":
+            description: User not found
+          "422":
+            description: Invalid user supplied
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../components/schemas/user/model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/photos/get.yml'),
+      trimIndent`\
+        summary: List photos
+        description: List photos
+        parameters:
+          - $ref: ../../../../components/parameters/pathUserId.yml
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../../components/schemas/photo/models.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/photos/post.yml'),
+      trimIndent`\
+        summary: Create a photo
+        parameters:
+          - $ref: ../../../../components/parameters/pathUserId.yml
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ../../../../components/schemas/photo/post.yml
+        responses:
+          "422":
+            description: Invalid photo supplied
+          "201":
+            description: Created
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../../components/schemas/photo/model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/delete.yml'),
+      trimIndent`\
+        summary: Delete photo
+        parameters:
+          - $ref: ../../../../../components/parameters/pathUserId.yml
+          - $ref: ../../../../../components/parameters/pathPhotoId.yml
+        responses:
+          "404":
+            description: Photo not found
+          "204":
+            description: Deleted
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/get.yml'),
+      trimIndent`\
+        summary: Show photo
+        parameters:
+          - $ref: ../../../../../components/parameters/pathUserId.yml
+          - $ref: ../../../../../components/parameters/pathPhotoId.yml
+        responses:
+          "404":
+            description: Photo not found
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../../../components/schemas/photo/model.yml
+      `,
+    );
+    assert.strictEqual(
+      await getFile('test/output/e2e/quotes/src/paths/users/{userId}/photos/{photoId}/patch.yml'),
+      trimIndent`\
+        summary: Update photo
+        parameters:
+          - $ref: ../../../../../components/parameters/pathUserId.yml
+          - $ref: ../../../../../components/parameters/pathPhotoId.yml
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: ../../../../../components/schemas/photo/patch.yml
+        responses:
+          "404":
+            description: Photo not found
+          "422":
+            description: Invalid photo supplied
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  $ref: ../../../../../components/schemas/photo/model.yml
+      `,
+    );
+  });
 }).catch(console.warn);

@@ -5,6 +5,7 @@ import { getModel, getModels, getPaginationModel, getParam } from '../templates/
 
 type ModelGenerationOptions = {
   name: string;
+  globalOptions: GlobalOptions;
   'no-model'?: boolean;
   type?: 'query' | 'header' | 'path';
   list?: boolean;
@@ -14,7 +15,6 @@ type ModelGenerationOptions = {
   patch?: boolean;
   post?: boolean;
   put?: boolean;
-  rootRef?: string;
 };
 
 export const modelCliArguments: Record<string, CliArg> = {
@@ -105,7 +105,7 @@ export const parseModelCommand: SubcommandGenerator = (args: string[], globalOpt
     return help(1, 'Error: --type argument must be query, header, or path');
   }
 
-  return getModelTasks({ ...parsed.values, rootRef: globalOptions['root-ref'], name });
+  return getModelTasks({ globalOptions, ...parsed.values, name });
 };
 
 export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[] => {
@@ -114,41 +114,41 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
 
   const tasks: GenerationTask[] = [];
   tasks.push({
-    contents: getModel,
+    contents: () => getModel(options.globalOptions),
     filename: `src/components/schemas/${dashName}/model.yml`,
     generate: !options['no-model'] && !options.type,
   });
 
-  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.rootRef);
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.globalOptions['root-ref']);
   if (options.type) {
     tasks.push({
-      contents: () => getParam(options.name, options.type as Exclude<(typeof options)['type'], undefined>),
+      contents: () => getParam(options.globalOptions, options.name, options.type as Exclude<(typeof options)['type'], undefined>),
       filename: `src/components/parameters/${options.type}${capitalize(camelName)}.yml`,
     });
   }
 
   if (options.list || options.crud) {
     tasks.push(
-      { contents: () => getModels(paginationRef), filename: `src/components/schemas/${dashName}/models.yml` },
-      { contents: () => getParam('limit', 'query', 'integer'), filename: `src/components/parameters/queryLimit.yml` },
-      { contents: () => getParam('offset', 'query', 'integer'), filename: `src/components/parameters/queryOffset.yml` },
-      { contents: () => getPaginationModel(), filename: `src/components/schemas/pagination/model.yml` },
+      { contents: () => getModels(options.globalOptions, paginationRef), filename: `src/components/schemas/${dashName}/models.yml` },
+      { contents: () => getParam(options.globalOptions, 'limit', 'query', 'integer'), filename: `src/components/parameters/queryLimit.yml` },
+      { contents: () => getParam(options.globalOptions, 'offset', 'query', 'integer'), filename: `src/components/parameters/queryOffset.yml` },
+      { contents: () => getPaginationModel(options.globalOptions), filename: `src/components/schemas/pagination/model.yml` },
     );
   }
   if (options.get || options.crud) {
-    tasks.push({ contents: getModel, filename: `src/components/schemas/${dashName}/get.yml` });
+    tasks.push({ contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/get.yml` });
   }
   if (options.delete || options.crud) {
-    tasks.push({ contents: getModel, filename: `src/components/schemas/${dashName}/delete.yml` });
+    tasks.push({ contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/delete.yml` });
   }
   if (options.patch || options.crud) {
-    tasks.push({ contents: getModel, filename: `src/components/schemas/${dashName}/patch.yml` });
+    tasks.push({ contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/patch.yml` });
   }
   if (options.post || options.crud) {
-    tasks.push({ contents: getModel, filename: `src/components/schemas/${dashName}/post.yml` });
+    tasks.push({ contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/post.yml` });
   }
   if (options.put) {
-    tasks.push({ contents: getModel, filename: `src/components/schemas/${dashName}/put.yml` });
+    tasks.push({ contents: () => getModel(options.globalOptions), filename: `src/components/schemas/${dashName}/put.yml` });
   }
 
   return tasks;
