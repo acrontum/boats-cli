@@ -70,19 +70,11 @@ describe('path.spec.ts', async () => {
       await getFile('test/output/path/.boatsrc'),
       trimIndent`\
         {
-          "nunjucksOptions": {
-            "tags": {}
-          },
           "picomatchOptions": {
             "bash": true
           },
-          "permissionConfig": {
-            "globalPrefix": true
-          },
-          "paths": {
-            "@shared/": "../shared/"
-          },
-          "fancyPluralization": true
+          "fancyPluralization": true,
+          "paths": {}
         }
       `,
     );

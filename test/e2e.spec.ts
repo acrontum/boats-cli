@@ -26,19 +26,11 @@ describe('e2e.spec.ts', async () => {
       content,
       trimIndent`\
       {
-        "nunjucksOptions": {
-          "tags": {}
-        },
         "picomatchOptions": {
           "bash": true
         },
-        "permissionConfig": {
-          "globalPrefix": true
-        },
-        "paths": {
-          "@shared/": "../shared/"
-        },
-        "fancyPluralization": true
+        "fancyPluralization": true,
+        "paths": {}
       }
     `,
     );
