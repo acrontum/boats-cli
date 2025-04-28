@@ -1,8 +1,10 @@
 import { default as template } from 'boats/build/src/Template';
 import { default as bundlerSwaggerParse } from 'boats/build/src/bundlerSwaggerParse';
 import { BoatsRC } from 'boats/build/src/interfaces/BoatsRc';
+import { access, readFile } from 'fs/promises';
 import { dirname } from 'path';
 import pj from '../package.json';
+import { getBoatsRc } from '../src/templates/init';
 
 export type ErrorWithLogs = Error & { code: string; logs: unknown[] };
 
@@ -10,14 +12,6 @@ type ConsoleMock = {
   logs: unknown[];
   original: Record<'log' | 'error' | 'warn' | 'info', typeof console.log>;
   unmock: () => void;
-};
-
-export const defaultBoats: BoatsRC = {
-  nunjucksOptions: { tags: {} },
-  picomatchOptions: { bash: true },
-  permissionConfig: { globalPrefix: true },
-  paths: {},
-  fancyPluralization: true,
 };
 
 const mockConsoleLog = (): ConsoleMock => {
@@ -74,19 +68,31 @@ const overridePackageJsonReader = (): void => {
   };
 };
 
+const defaultBoatsRc = JSON.parse(getBoatsRc()) as BoatsRC;
+
 export const boats = async (inFile: string, outFile: string, validate = true): Promise<string> => {
   const trim = dirname(inFile) + '/paths/';
+  const customBoatsRcPath = dirname(dirname(inFile)) + '/.boatsrc';
+  let boatsRc = defaultBoatsRc;
+  try {
+    const hasBoatsRc = await access(customBoatsRcPath)
+      .then(() => true)
+      .catch(() => false);
+    if (hasBoatsRc) {
+      boatsRc = JSON.parse(await readFile(customBoatsRcPath, { encoding: 'utf8' })) as BoatsRC;
+    }
+  } catch (_e: unknown) {}
 
   overridePackageJsonReader();
   // overwrite console during testing - no debug output needed
   const con = mockConsoleLog();
 
   try {
-    const indexFile = template.directoryParse(inFile, outFile, null as unknown as number, trim, [], [], defaultBoats, false);
+    const indexFile = template.directoryParse(inFile, outFile, null as unknown as number, trim, [], [], boatsRc, false);
     const outApiFile = await bundlerSwaggerParse({
       inputFile: indexFile,
       outputFile: outFile,
-      boatsRc: defaultBoats,
+      boatsRc,
       dereference: false,
       doNotValidate: !validate,
       excludeVersion: false,

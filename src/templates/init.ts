@@ -40,20 +40,11 @@ export const getBoatsRc = (): string => {
   return (
     JSON.stringify(
       {
-        nunjucksOptions: {
-          // this empty object just needs to exist, otherwise boats explodes
-          tags: {},
-        },
         picomatchOptions: {
           bash: true,
         },
-        permissionConfig: {
-          globalPrefix: true,
-        },
-        paths: {
-          '@shared/': '../shared/',
-        },
         fancyPluralization: true,
+        paths: {},
       },
       null,
       2,
