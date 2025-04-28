@@ -181,7 +181,7 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
   const dashName = dashCase(singleModelName);
   const singularName = camelCase(singleModelName);
 
-  const paginationRef = getRootRef('../pagination/model.yml', '#/components/PaginationModel', options.rootRef);
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.rootRef);
 
   if (options.list) {
     const filename = `src/paths/${normalizedBaseFilepath}/get.yml`;

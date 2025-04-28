@@ -31,7 +31,7 @@
     "@types/node": "^22.13.1",
     "@types/nunjucks": "^3.2.6",
     "auto-changelog": "^2.5.0",
-    "boats": "^5.1.2",
+    "boats": "^5.1.3",
     "prettier": "^3.5.1",
     "source-map-support": "^0.5.21",
     "typescript": "^5.4.5"
