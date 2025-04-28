@@ -119,7 +119,7 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
     generate: !options['no-model'] && !options.type,
   });
 
-  const paginationRef = getRootRef('../pagination/model.yml', '#/components/PaginationModel', options.rootRef);
+  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.rootRef);
   if (options.type) {
     tasks.push({
       contents: () => getParam(options.name, options.type as Exclude<(typeof options)['type'], undefined>),

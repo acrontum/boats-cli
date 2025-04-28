@@ -333,7 +333,7 @@ describe('e2e.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/Pagination"
+            $ref: "#/components/schemas/Pagination"
           data:
             type: "array"
             items:
@@ -351,7 +351,7 @@ describe('e2e.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/Pagination"
+            $ref: "#/components/schemas/Pagination"
           data:
             type: "array"
             items:
@@ -582,7 +582,7 @@ describe('e2e.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/PaginationModel"
+            $ref: "#/components/schemas/PaginationModel"
           data:
             type: "array"
             items:
@@ -600,7 +600,7 @@ describe('e2e.spec.ts', async () => {
           - "data"
         properties:
           meta:
-            $ref: "#/components/PaginationModel"
+            $ref: "#/components/schemas/PaginationModel"
           data:
             type: "array"
             items:
