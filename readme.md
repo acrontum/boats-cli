@@ -110,12 +110,12 @@ exports.getUpdate = (opts, file) => { /* ... */ };
 exports.getReplace = (opts, file) => { /* ... */ };
 ```
 
-for exmaple, `templates/index.js` or `exports.getList`:
+for example, `templates/index.js` or `exports.getList`:
 ```js
 // @ts-check
 const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
 
-/** @type{import('@acrontum/boats-cli/').CustomTemplates['getList']} */
+/** @type{import('@acrontum/boats-cli').CustomTemplates['getList']} */
 module.exports = (_globalOptions, file, pluralName, schemaRef, parameters) => {
   return toYaml({
     summary: `from ${file}`,
@@ -143,7 +143,7 @@ const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
 const { writeFile, mkdir } = require('node:fs/promises');
 const { dirname, join } = require('node:path');
 
-/** @type{import('@acrontum/boats-cli/').CustomTemplates['getModel']} */
+/** @type{import('@acrontum/boats-cli').CustomTemplates['getModel']} */
 module.exports = async (globalOptions, file) => {
   const base = join(globalOptions.output || '.', file.replace('model.yml', 'base.yml'));
   const extend = join(globalOptions.output || '.', file.replace('model.yml', 'extend.yml'));
@@ -185,7 +185,7 @@ module.exports = async (globalOptions, file) => {
 };
 ```
 
-see [custom-models.spec.ts](./test/custom-models.spec.ts) and the [overrides folder]('./test/fixtures/overrides/') for more examples.
+see [custom-models.spec.ts](./test/custom-models.spec.ts) and the [test overrides folder]('./test/fixtures/overrides/') for more examples.
 
 
 ## Development
