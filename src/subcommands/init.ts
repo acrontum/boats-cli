@@ -49,9 +49,15 @@ export const parseInitCommand: SubcommandGenerator = (args: string[], options: G
       case '--all':
       case '-a':
         tasks.push(
-          { contents: () => getComponentIndex(options['root-ref']), filename: 'src/components/schemas/index.yml' },
-          { contents: () => getComponentIndex(''), filename: 'src/components/parameters/index.yml' },
-          { contents: getPathIndex, filename: 'src/paths/index.yml' },
+          {
+            contents: () => getComponentIndex(options, 'src/components/schemas/index.yml'),
+            filename: 'src/components/schemas/index.yml',
+          },
+          {
+            contents: () => getComponentIndex({ 'root-ref': '' }, 'src/components/parameters/index.yml'),
+            filename: 'src/components/parameters/index.yml',
+          },
+          { contents: () => getPathIndex(options, 'src/paths/index.yml'), filename: 'src/paths/index.yml' },
         );
         break;
       default:

@@ -1,0 +1,513 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/albums": {
+      "get": {
+        "summary": "from src/paths/albums/get.yml",
+        "description": "pluralName albums",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Albums"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/albums/{albumId}": {
+      "get": {
+        "summary": "Show something, from src/paths/albums/{albumId}/get.yml",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/albums/{albumId}/songs": {
+      "get": {
+        "summary": "from src/paths/albums/{albumId}/songs/get.yml",
+        "description": "pluralName songs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathAlbumId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Songs"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "create",
+        "description": "from src/paths/albums/{albumId}/songs/post.yml"
+      }
+    },
+    "/albums/{albumId}/songs/{songId}": {
+      "delete": {
+        "summary": "delete",
+        "description": "from src/paths/albums/{albumId}/songs/{songId}/delete.yml"
+      },
+      "get": {
+        "summary": "Show something, from src/paths/albums/{albumId}/songs/{songId}/get.yml",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update parts of a song",
+        "description": "from src/paths/albums/{albumId}/songs/{songId}/patch.yml",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathAlbumId"
+          },
+          {
+            "$ref": "#/components/parameters/PathSongId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SongPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Song"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Song not found"
+          },
+          "422": {
+            "description": "Invalid song supplied"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "create",
+        "description": "from src/paths/auth/login/post.yml"
+      }
+    },
+    "/auth/refresh-token": {
+      "get": {
+        "summary": "Show something, from src/paths/auth/refresh-token/get.yml",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/auth/verify": {
+      "get": {
+        "summary": "Show something, from src/paths/auth/verify/get.yml",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "title": "from src/index.yml",
+    "version": "1.0"
+  },
+  "components": {
+    "parameters": {
+      "PathAlbumId": {
+        "in": "path",
+        "name": "albumId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/pathAlbumId.yml"
+      },
+      "PathSongId": {
+        "in": "path",
+        "name": "songId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/pathSongId.yml"
+      },
+      "QueryLimit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "query param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/queryLimit.yml"
+      },
+      "QueryOffset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "query param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/queryOffset.yml"
+      }
+    },
+    "schemas": {
+      "AlbumBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Album": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AlbumBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "Albums": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Album"
+            }
+          }
+        }
+      },
+      "ArtistBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Artist": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ArtistBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "JwtBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Jwt": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/JwtBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "LoginBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LoginBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "LoginPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Starting index"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Max items returned"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total items available"
+          }
+        }
+      },
+      "RefreshTokenBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "RefreshToken": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RefreshTokenBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "SongBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Song": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SongBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      },
+      "Songs": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Song"
+            }
+          }
+        }
+      },
+      "SongPatch": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SongPost": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "VerifyBase": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Verify": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/VerifyBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

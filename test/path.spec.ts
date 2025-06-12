@@ -378,7 +378,7 @@ describe('path.spec.ts', async () => {
 
     assert.deepStrictEqual(await getAllFiles('test/output/path'), outputFiles, 'files mismatch');
 
-    assert.equal(await getFile('test/output/path/.boatsrc'), getBoatsRc());
+    assert.equal(await getFile('test/output/path/.boatsrc'), getBoatsRc({}, ''));
 
     assert.equal(await getFile('test/output/path/src/components/parameters/index.yml'), '{{ autoComponentIndexer() }}\n');
 
@@ -479,7 +479,7 @@ describe('path.spec.ts', async () => {
 
     assert.equal(await getFile('test/output/path/src/components/schemas/photo/post.yml'), baseModel);
 
-    assert.equal(await getFile('test/output/path/src/index.yml'), getIndex({}));
+    assert.equal(await getFile('test/output/path/src/index.yml'), getIndex({}, ''));
 
     assert.equal(await getFile('test/output/path/src/paths/index.yml'), '{{ autoPathIndexer() }}\n');
 

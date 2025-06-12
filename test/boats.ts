@@ -14,7 +14,7 @@ type ConsoleMock = {
   unmock: () => void;
 };
 
-const mockConsoleLog = (): ConsoleMock => {
+export const mockConsoleLog = (): ConsoleMock => {
   /* eslint-disable no-console */
   const olog = console.log;
   const oerror = console.error;
@@ -68,7 +68,7 @@ const overridePackageJsonReader = (): void => {
   };
 };
 
-const defaultBoatsRc = JSON.parse(getBoatsRc()) as BoatsRC;
+const defaultBoatsRc = JSON.parse(getBoatsRc({}, '')) as BoatsRC;
 
 export const boats = async (inFile: string, outFile: string, validate = true): Promise<string> => {
   const trim = dirname(inFile) + '/paths/';

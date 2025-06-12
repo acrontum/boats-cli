@@ -14,7 +14,7 @@
   "scripts": {
     "prebuild": "rm -rf dist/*",
     "build": "tsc",
-    "lint": "eslint src test",
+    "lint": "eslint '{src,test}/**/*.ts'",
     "version": "npm verison --no-commit-hooks --no-git-tag-version",
     "setup": "git config core.hooksPath ./githooks",
     "docs": "npm run docs-readme && npm run docs-changelog",
