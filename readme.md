@@ -30,6 +30,7 @@ npx --yes doctoc --github readme.md
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Quick Start](#quick-start)
+- [Custom Generator Overrides](#custom-generator-overrides)
 - [Development](#development)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
