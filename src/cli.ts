@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { mkdir } from 'node:fs/promises';
-import { relative } from 'node:path';
+import { mkdir, access, stat, readdir } from 'node:fs/promises';
+import { join, relative, resolve } from 'node:path';
 import { parseArgs, ParseArgsConfig } from 'node:util';
 import { generate, GenerationTask, logger } from './generate';
 import { argname, description } from './lib';
@@ -9,6 +9,8 @@ import { parseInitCommand } from './subcommands/init';
 import { modelCliArguments, parseModelCommand } from './subcommands/model';
 import { parsePathCommand, pathCliArguments } from './subcommands/path';
 import { getBoatsRc, getIndex } from './templates/init';
+import { getComponentIndex, getModel, getModels, getPaginationModel, getParam } from './templates/model';
+import { getCreate, getDelete, getList, getPathIndex, getReplace, getShow, getUpdate } from './templates/path';
 
 export type ParseArgsOptionConfig = NonNullable<ParseArgsConfig['options']>[string];
 export type CliArg = ParseArgsOptionConfig & { [description]: string; [argname]?: string };
@@ -22,8 +24,27 @@ export type GlobalOptions = {
   quiet?: boolean;
   verbose?: boolean;
   'root-ref'?: string;
+  customTemplates?: {
+    getBoatsRc?: typeof getBoatsRc;
+    getIndex?: typeof getIndex;
+
+    getComponentIndex?: typeof getComponentIndex;
+    getModel?: typeof getModel;
+    getModels?: typeof getModels;
+    getParam?: typeof getParam;
+    getPaginationModel?: typeof getPaginationModel;
+
+    getPathIndex?: typeof getPathIndex;
+    getList?: typeof getList;
+    getCreate?: typeof getCreate;
+    getShow?: typeof getShow;
+    getDelete?: typeof getDelete;
+    getUpdate?: typeof getUpdate;
+    getReplace?: typeof getReplace;
+  };
 };
 export type SubcommandGenerator = (args: string[], options: GlobalOptions) => GenerationTask[] | null;
+export type CustomTemplates = Exclude<GlobalOptions['customTemplates'], undefined>;
 
 /**
  * Custom error to immediately exit on errors.
@@ -45,8 +66,35 @@ const subcommands: Record<string, SubcommandGenerator> = {
   init: parseInitCommand,
 };
 
+const templateFileMapping = {
+  'boats-rc.js': 'getBoatsRc',
+  'component-index.js': 'getComponentIndex',
+  'create.js': 'getCreate',
+  'delete.js': 'getDelete',
+  'index.js': 'getIndex',
+  'list.js': 'getList',
+  'model.js': 'getModel',
+  'models.js': 'getModels',
+  'pagination-model.js': 'getPaginationModel',
+  'param.js': 'getParam',
+  'path-index.js': 'getPathIndex',
+  'replace.js': 'getReplace',
+  'show.js': 'getShow',
+  'update.js': 'getUpdate',
+} as const satisfies Record<string, keyof Exclude<GlobalOptions['customTemplates'], undefined>>;
+
 export const cliArguments: Record<string, CliArg> = {
+  /*
+  -t --templates
+  create.js  delete.js  list.js  model.js  models.js  pagination.js  param.js  replace.js  show.js  update.js
+  */
   'dry-run': { type: 'boolean', short: 'D', [description]: 'Print the changes to be made' },
+  templates: {
+    type: 'string',
+    short: 'T',
+    [argname]: 'TEMPLATES',
+    [description]: 'Folder or module containing template overrides',
+  },
   force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
   'no-index': { type: 'boolean', short: 'I', [description]: 'Skip auto-creating index files, only models' },
   'no-init': { type: 'boolean', short: 'N', [description]: 'Skip auto-creating init files' },
@@ -114,6 +162,11 @@ Subcommands:
   model SINGULAR_NAME [...OPTIONS]
   init [-a]
 
+If templates are used (-T, --templates), the following filenames / exports are used (files when path is a folder, export function name if is a module):
+  - ${Object.entries(templateFileMapping)
+    .map(([file, fn]) => `${file.padEnd(19, ' ')} - ${fn}`)
+    .join('\n  - ')}
+
 Examples:
   npx bc path users/:id --list --get --delete --patch --put
 
@@ -153,6 +206,90 @@ export const parseCliArgs = (
   }
 };
 
+const tryRequire = (path: string): GlobalOptions['customTemplates'] | null => {
+  const overrides: Exclude<GlobalOptions['customTemplates'], undefined> = {};
+  let lib: Exclude<GlobalOptions['customTemplates'], undefined> | null = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    lib = require(path) as Exclude<GlobalOptions['customTemplates'], undefined>;
+  } catch (_) {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    lib = require(resolve(path)) as Exclude<GlobalOptions['customTemplates'], undefined>;
+  } catch (_) {}
+
+  if (lib) {
+    overrides.getBoatsRc = lib.getBoatsRc;
+    overrides.getIndex = lib.getIndex;
+    overrides.getComponentIndex = lib.getComponentIndex;
+    overrides.getModel = lib.getModel;
+    overrides.getModels = lib.getModels;
+    overrides.getParam = lib.getParam;
+    overrides.getPaginationModel = lib.getPaginationModel;
+    overrides.getPathIndex = lib.getPathIndex;
+    overrides.getList = lib.getList;
+    overrides.getCreate = lib.getCreate;
+    overrides.getShow = lib.getShow;
+    overrides.getDelete = lib.getDelete;
+    overrides.getUpdate = lib.getUpdate;
+    overrides.getReplace = lib.getReplace;
+
+    if (!Object.values(overrides).find((v) => typeof v !== 'undefined')) {
+      logger.console.error(`cannot load templates "${path}": module has no override exports\n`);
+
+      return help(1);
+    }
+
+    return overrides;
+  }
+
+  logger.console.error(`cannot load templates "${path}": not a module\n`);
+
+  return help(1);
+};
+
+const getTemplates = async (path: string): Promise<GlobalOptions['customTemplates'] | null> => {
+  const overrides: Exclude<GlobalOptions['customTemplates'], undefined> = {};
+  const fullPath = resolve(path);
+
+  const accessible = await access(fullPath)
+    .then(() => true)
+    .catch(() => false);
+  if (!accessible) {
+    return tryRequire(path);
+  }
+
+  const folder = await stat(fullPath).catch(() => null);
+  if (folder === null) {
+    return tryRequire(path);
+  }
+
+  if (!folder.isDirectory()) {
+    return tryRequire(path);
+  }
+
+  const files = await readdir(fullPath).catch(() => null);
+  if (files === null) {
+    logger.console.error(`cannot load templates "${path}": could not read template folder contents\n`);
+
+    return help(1);
+  }
+
+  const matchingFiles = files.filter((file) => file in templateFileMapping) as (keyof typeof templateFileMapping)[];
+  if (matchingFiles.length === 0) {
+    logger.console.error(`cannot load templates "${path}": template folder has no override files\n`);
+
+    return help(1);
+  }
+
+  for (const file of matchingFiles) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
+    overrides[templateFileMapping[file]] = require(join(fullPath, file));
+  }
+
+  return overrides;
+};
+
 export const cli = async (args: string[]): Promise<Record<string, GenerationTask>> => {
   const processed = parseCliArgs(
     {
@@ -176,6 +313,7 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
   const globalOptions: GlobalOptions = {};
   const todo: string[][] = [];
   const subcommand: string[] = [];
+  let processTemplates: string | null = null;
 
   let done = false;
   let hasSubCommand = false;
@@ -194,13 +332,24 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
         }
 
         if (arg.name in cliArguments) {
-          if (arg.name === 'output' || arg.name === 'root-ref') {
+          if (arg.name === 'templates') {
+            if (!arg.value) {
+              help(1, `Parameter '--${arg.name}' requires a value`);
+
+              return {};
+            }
+            processTemplates = arg.inlineValue ? arg.value.slice(1) : arg.value;
+          } else if (arg.name === 'output' || arg.name === 'root-ref') {
             if (!arg.value) {
               help(1, `Parameter '--${arg.name}' requires a value`);
 
               return {};
             }
             globalOptions[arg.name] = arg.value;
+          } else if (arg.value) {
+            help(1, `Parameter '--${arg.name}' is not expecting a value`);
+
+            return {};
           } else {
             globalOptions[arg.name as Exclude<keyof typeof globalOptions, 'output' | 'root-ref'>] = true;
           }
@@ -266,8 +415,18 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
     globalOptions.output = relative('.', globalOptions.output);
   }
 
+  if (processTemplates) {
+    const templates = await getTemplates(processTemplates);
+    if (templates !== null) {
+      globalOptions.customTemplates = templates;
+    }
+  }
+
   if (!globalOptions['no-init']) {
-    tasks.push({ contents: () => getIndex(globalOptions), filename: 'src/index.yml' }, { contents: getBoatsRc, filename: '.boatsrc' });
+    tasks.push(
+      { contents: () => getIndex(globalOptions, 'src/index.yml'), filename: 'src/index.yml' },
+      { contents: () => getBoatsRc(globalOptions, '.boatsrc'), filename: '.boatsrc' },
+    );
   }
 
   if (!tasks.length) {
@@ -290,6 +449,8 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
       return {};
     }
   }
+
+  // if custom templates - find all and import
 
   return await generate(tasks, globalOptions);
 };

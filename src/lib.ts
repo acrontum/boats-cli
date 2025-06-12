@@ -1,11 +1,10 @@
-import { access, mkdir as fsmkdir, writeFile } from 'node:fs/promises';
+import { access, mkdir, writeFile } from 'node:fs/promises';
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-object-type */
 export interface JsonArray extends Array<string | number | boolean | Json | JsonArray | null> {}
 export interface Json {
   [x: string]: string | number | boolean | Json | JsonArray | null;
 }
-
 const endings: Record<string, string> = {
   ves: 'fe',
   ies: 'y',
@@ -42,7 +41,7 @@ export const exists = (path: string): Promise<boolean> =>
     .then(() => true)
     .catch(() => false);
 
-export const mkdir = async (path: string): Promise<string | undefined> => fsmkdir(path, { recursive: true });
+export const mkdirp = async (path: string): Promise<string | undefined> => mkdir(path, { recursive: true });
 
 export const createFile = async (path: string, content: string, force = false): Promise<boolean> => {
   if (!force && (await exists(path))) {

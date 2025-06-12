@@ -1,15 +1,23 @@
 import { GlobalOptions } from '../cli';
 import { toYaml } from '../lib';
 
-export const getComponentIndex = (rootRef?: string): string => {
-  if (rootRef === '-' || rootRef === '') {
+export const getComponentIndex = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getComponentIndex === 'function') {
+    return globalOptions.customTemplates.getComponentIndex(globalOptions, file);
+  }
+
+  if (globalOptions['root-ref'] === '-' || globalOptions['root-ref'] === '') {
     return '{{ autoComponentIndexer() }}\n';
   }
 
-  return `{{ autoComponentIndexer('${rootRef || 'Model'}') }}\n`;
+  return `{{ autoComponentIndexer('${globalOptions['root-ref'] || 'Model'}') }}\n`;
 };
 
-export const getModel = (globalOptions: GlobalOptions): string => {
+export const getModel = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getModel === 'function') {
+    return globalOptions.customTemplates.getModel(globalOptions, file);
+  }
+
   return toYaml(
     {
       type: 'object',
@@ -30,7 +38,11 @@ export const getModel = (globalOptions: GlobalOptions): string => {
   );
 };
 
-export const getModels = (globalOptions: GlobalOptions, paginationRef: string = '../pagination/model.yml'): string => {
+export const getModels = (globalOptions: GlobalOptions, file: string, paginationRef: string = '../pagination/model.yml'): string => {
+  if (typeof globalOptions.customTemplates?.getModels === 'function') {
+    return globalOptions.customTemplates.getModels(globalOptions, file, paginationRef);
+  }
+
   return toYaml(
     {
       type: 'object',
@@ -48,7 +60,17 @@ export const getModels = (globalOptions: GlobalOptions, paginationRef: string = 
   );
 };
 
-export const getParam = (globalOptions: GlobalOptions, name: string, paramIn: 'header' | 'path' | 'query', type: string = 'string'): string => {
+export const getParam = (
+  globalOptions: GlobalOptions,
+  file: string,
+  name: string,
+  paramIn: 'header' | 'path' | 'query',
+  type: string = 'string',
+): string => {
+  if (typeof globalOptions.customTemplates?.getParam === 'function') {
+    return globalOptions.customTemplates.getParam(globalOptions, file, name, paramIn, type);
+  }
+
   return toYaml(
     {
       in: paramIn,
@@ -62,7 +84,11 @@ export const getParam = (globalOptions: GlobalOptions, name: string, paramIn: 'h
   );
 };
 
-export const getPaginationModel = (globalOptions: GlobalOptions): string => {
+export const getPaginationModel = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getPaginationModel === 'function') {
+    return globalOptions.customTemplates.getPaginationModel(globalOptions, file);
+  }
+
   return toYaml(
     {
       type: 'object',

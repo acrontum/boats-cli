@@ -1,7 +1,7 @@
 import { GlobalOptions } from '../cli';
 import { toYaml } from '../lib';
 
-const autoTagOpid = `
+export const autoTagOpid = `
 {{
   inject([
     {
@@ -16,7 +16,11 @@ const autoTagOpid = `
   ])
 }}`;
 
-export const getIndex = (globalOptions: GlobalOptions): string => {
+export const getIndex = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getIndex === 'function') {
+    return globalOptions.customTemplates.getIndex(globalOptions, file);
+  }
+
   const yaml = toYaml(
     {
       openapi: '3.1.0',
@@ -41,7 +45,11 @@ export const getIndex = (globalOptions: GlobalOptions): string => {
   return `${yaml}${autoTagOpid}\n`;
 };
 
-export const getBoatsRc = (): string => {
+export const getBoatsRc = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getBoatsRc === 'function') {
+    return globalOptions.customTemplates.getBoatsRc(globalOptions, file);
+  }
+
   return (
     JSON.stringify(
       {

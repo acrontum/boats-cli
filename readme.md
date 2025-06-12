@@ -73,6 +73,120 @@ npm i --save-dev @acrontum/boats-cli
 then you can just run `npx bc model test --dry-run`.
 
 
+## Custom Generator Overrides
+
+You can override any of the generators by adding any of these files to a templates folder, and passing `--templates <folder>` to the cli:
+- boats-rc.js
+- component-index.js
+- create.js
+- delete.js
+- index.js
+- list.js
+- model.js
+- models.js
+- pagination-model.js
+- param.js
+- path-index.js
+- replace.js
+- show.js
+- update.js
+
+Or, alternatively, exporting any of the following methods from a module (local file or node module):
+```js
+exports.getBoatsRc = (opts, file) => { /* ... */ };
+exports.getIndex = (opts, file) => { /* ... */ };
+exports.getComponentIndex = (opts, file) => { /* ... */ };
+exports.getModel = (opts, file) => { /* ... */ };
+exports.getModels = (opts, file) => { /* ... */ };
+exports.getParam = (opts, file) => { /* ... */ };
+exports.getPaginationModel = (opts, file) => { /* ... */ };
+exports.getPathIndex = (opts, file) => { /* ... */ };
+exports.getList = (opts, file) => { /* ... */ };
+exports.getCreate = (opts, file) => { /* ... */ };
+exports.getShow = (opts, file) => { /* ... */ };
+exports.getDelete = (opts, file) => { /* ... */ };
+exports.getUpdate = (opts, file) => { /* ... */ };
+exports.getReplace = (opts, file) => { /* ... */ };
+```
+
+for exmaple, `templates/index.js` or `exports.getList`:
+```js
+// @ts-check
+const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
+
+/** @type{import('@acrontum/boats-cli/').CustomTemplates['getList']} */
+module.exports = (_globalOptions, file, pluralName, schemaRef, parameters) => {
+  return toYaml({
+    summary: `from ${file}`,
+    description: `pluralName ${pluralName}`,
+    ...(parameters?.length ? { parameters } : {}),
+    responses: {
+      '"200"': {
+        description: 'Success',
+        content: {
+          'application/json': {
+            schema: { $ref: schemaRef },
+          },
+        },
+      },
+    },
+  });
+};
+
+````
+
+or disabling the default generator and instead creating 2 different files for models `templates/model.yml` or `exports.getModel`:
+```js
+// @ts-check
+const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
+const { writeFile, mkdir } = require('node:fs/promises');
+const { dirname, join } = require('node:path');
+
+/** @type{import('@acrontum/boats-cli/').CustomTemplates['getModel']} */
+module.exports = async (globalOptions, file) => {
+  const base = join(globalOptions.output || '.', file.replace('model.yml', 'base.yml'));
+  const extend = join(globalOptions.output || '.', file.replace('model.yml', 'extend.yml'));
+
+  await mkdir(dirname(base), { recursive: true });
+
+  await Promise.all([
+    writeFile(
+      base,
+      toYaml({
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: { type: 'string' },
+        },
+      }),
+    ),
+    writeFile(
+      extend,
+      toYaml({
+        allOf: [
+          { $ref: './base.yml' },
+          {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                format: 'uuid',
+              },
+            },
+          },
+        ],
+      }),
+    ),
+  ]);
+
+  // prevent default generation
+  return '';
+};
+```
+
+see [custom-models.spec.ts](./test/custom-models.spec.ts) and the [overrides folder]('./test/fixtures/overrides/') for more examples.
+
+
 ## Development
 
 Configure githooks:

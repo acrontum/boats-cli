@@ -1,0 +1,14 @@
+exports.getBoatsRc = (_opts, file) => file;
+exports.getIndex = (_opts, file) => file;
+exports.getComponentIndex = (_opts, file) => file;
+exports.getModel = (_opts, file) => file;
+exports.getModels = (_opts, file) => file;
+exports.getParam = (_opts, file) => file;
+exports.getPaginationModel = (_opts, file) => file;
+exports.getPathIndex = (_opts, file) => file;
+exports.getList = (_opts, file) => file;
+exports.getCreate = (_opts, file) => file;
+exports.getShow = (_opts, file) => file;
+exports.getDelete = (_opts, file) => file;
+exports.getUpdate = (_opts, file) => file;
+exports.getReplace = (_opts, file) => file;

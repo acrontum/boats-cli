@@ -1,9 +1,25 @@
 import { GlobalOptions } from '../cli';
 import { capitalize, dashCase, toYaml } from '../lib';
 
-export const getPathIndex = (): string => '{{ autoPathIndexer() }}\n';
+export const getPathIndex = (globalOptions: GlobalOptions, file: string): string => {
+  if (typeof globalOptions.customTemplates?.getPathIndex === 'function') {
+    return globalOptions.customTemplates.getPathIndex(globalOptions, file);
+  }
 
-export const getList = (globalOptions: GlobalOptions, pluralName: string, schemaRef: string, parameters?: { $ref: string }[]): string => {
+  return '{{ autoPathIndexer() }}\n';
+};
+
+export const getList = (
+  globalOptions: GlobalOptions,
+  file: string,
+  pluralName: string,
+  schemaRef: string,
+  parameters?: { $ref: string }[],
+): string => {
+  if (typeof globalOptions.customTemplates?.getList === 'function') {
+    return globalOptions.customTemplates.getList(globalOptions, file, pluralName, schemaRef, parameters);
+  }
+
   const spaceName = dashCase(pluralName).replace(/-/g, ' ');
 
   return toYaml(
@@ -29,11 +45,16 @@ export const getList = (globalOptions: GlobalOptions, pluralName: string, schema
 
 export const getCreate = (
   globalOptions: GlobalOptions,
+  file: string,
   singularName: string,
   requestSchemaRef: string,
   responseSchemaRef: string,
   parameters?: { $ref: string }[],
 ): string => {
+  if (typeof globalOptions.customTemplates?.getCreate === 'function') {
+    return globalOptions.customTemplates.getCreate(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+  }
+
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml(
@@ -67,7 +88,17 @@ export const getCreate = (
   );
 };
 
-export const getShow = (globalOptions: GlobalOptions, singularName: string, responseSchemaRef: string, parameters?: { $ref: string }[]): string => {
+export const getShow = (
+  globalOptions: GlobalOptions,
+  file: string,
+  singularName: string,
+  responseSchemaRef: string,
+  parameters?: { $ref: string }[],
+): string => {
+  if (typeof globalOptions.customTemplates?.getShow === 'function') {
+    return globalOptions.customTemplates.getShow(globalOptions, file, singularName, responseSchemaRef, parameters);
+  }
+
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml(
@@ -93,7 +124,11 @@ export const getShow = (globalOptions: GlobalOptions, singularName: string, resp
   );
 };
 
-export const getDelete = (globalOptions: GlobalOptions, singularName: string, parameters?: { $ref: string }[]): string => {
+export const getDelete = (globalOptions: GlobalOptions, file: string, singularName: string, parameters?: { $ref: string }[]): string => {
+  if (typeof globalOptions.customTemplates?.getDelete === 'function') {
+    return globalOptions.customTemplates.getDelete(globalOptions, file, singularName, parameters);
+  }
+
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml(
@@ -116,11 +151,16 @@ export const getDelete = (globalOptions: GlobalOptions, singularName: string, pa
 
 export const getUpdate = (
   globalOptions: GlobalOptions,
+  file: string,
   singularName: string,
   requestSchemaRef: string,
   responseSchemaRef: string,
   parameters?: { $ref: string }[],
 ): string => {
+  if (typeof globalOptions.customTemplates?.getUpdate === 'function') {
+    return globalOptions.customTemplates.getUpdate(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+  }
+
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml(
@@ -159,11 +199,16 @@ export const getUpdate = (
 
 export const getReplace = (
   globalOptions: GlobalOptions,
+  file: string,
   singularName: string,
   requestSchemaRef: string,
   responseSchemaRef: string,
   parameters?: { $ref: string }[],
 ): string => {
+  if (typeof globalOptions.customTemplates?.getReplace === 'function') {
+    return globalOptions.customTemplates.getReplace(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+  }
+
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
 
   return toYaml(
