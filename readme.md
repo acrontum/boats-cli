@@ -144,7 +144,7 @@ module.exports = (_globalOptions, file, pluralName, schemaRef, parameters) => {
 // or exports.getList = (_globalOptions, file, pluralName, schemaRef, parameters) => { ... }
 ````
 
-or disabling the default generator and instead creating 2 different files for models (`templates/model.yml` or `exports.getModel`):
+or disabling the default generator and instead creating 2 different files for models (`templates/model.js` or `exports.getModel`):
 ```js
 // @ts-check
 const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
