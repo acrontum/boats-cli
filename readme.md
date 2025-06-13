@@ -193,7 +193,7 @@ module.exports = async (globalOptions, file) => {
 };
 ```
 
-see [custom-models.spec.ts](./test/custom-models.spec.ts) and the [test overrides folder]('./test/fixtures/overrides/') for more examples.
+see [custom-models.spec.ts](./test/custom-models.spec.ts) and the [test overrides folder](./test/fixtures/overrides/) for more examples.
 
 
 ## Development
