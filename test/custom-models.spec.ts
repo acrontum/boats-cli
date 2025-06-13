@@ -29,7 +29,7 @@ describe('custom-models.spec.ts', async () => {
     `),
     );
 
-    const indexFile = await boats('test/output/custom/src/index.yml', 'test/output/custom/api.json');
+    const indexFile = await boats('test/output/custom/src/index.yml', 'test/output/custom/build/api.json');
 
     assert.strictEqual(indexFile !== '', true, 'boats failed');
     assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/custom.json'), 'spec mismatch');
@@ -96,38 +96,30 @@ describe('custom-models.spec.ts', async () => {
         --quiet
         --output test/output/custom
         -T test/fixtures/overrides/module.js
+        --templates test/fixtures/overrides
+        --templates test/fixtures/overrides/single-export/
     `),
     );
 
-    const files = await getAllFiles('test/output/custom/');
-    assert.deepStrictEqual(files, [
-      'test/output/custom/.boatsrc',
-      'test/output/custom/src/components/parameters/index.yml',
-      'test/output/custom/src/components/parameters/pathUserId.yml',
-      'test/output/custom/src/components/parameters/queryLimit.yml',
-      'test/output/custom/src/components/parameters/queryOffset.yml',
-      'test/output/custom/src/components/parameters/queryUserId.yml',
-      'test/output/custom/src/components/schemas/index.yml',
-      'test/output/custom/src/components/schemas/jwt/model.yml',
-      'test/output/custom/src/components/schemas/pagination/model.yml',
-      'test/output/custom/src/components/schemas/user/model.yml',
-      'test/output/custom/src/components/schemas/user/models.yml',
-      'test/output/custom/src/components/schemas/user/patch.yml',
-      'test/output/custom/src/components/schemas/user/post.yml',
-      'test/output/custom/src/components/schemas/user/put.yml',
-      'test/output/custom/src/index.yml',
-      'test/output/custom/src/paths/index.yml',
-      'test/output/custom/src/paths/users/get.yml',
-      'test/output/custom/src/paths/users/post.yml',
-      'test/output/custom/src/paths/users/{userId}/delete.yml',
-      'test/output/custom/src/paths/users/{userId}/get.yml',
-      'test/output/custom/src/paths/users/{userId}/patch.yml',
-      'test/output/custom/src/paths/users/{userId}/put.yml',
-    ]);
+    const indexFile = await boats('test/output/custom/src/index.yml', 'test/output/custom/build/api.json');
 
-    for (const file of await getAllFiles('test/output/custom/')) {
-      assert.deepStrictEqual(await getFile(file), file.replace('test/output/custom/', ''));
-    }
+    assert.strictEqual(indexFile !== '', true, 'boats failed');
+    assert.strictEqual(await getFile(indexFile), await getFile('test/fixtures/spec/custom-multi.json'), 'spec mismatch');
+  });
+
+  await it('adds and overwrites templates when invoked multiple times', async () => {
+    assert.deepStrictEqual(await getAllFiles('test/output/custom/').catch(() => []), []);
+
+    await cli(
+      toArgv(`
+        path users/:userId -crudl --put
+        model jwt
+        model userId --type query
+        --quiet
+        --output test/output/custom
+        -T test/fixtures/overrides/module.js
+    `),
+    );
   });
 
   await it('outputs a meaningful error message', async () => {

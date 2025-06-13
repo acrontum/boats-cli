@@ -93,7 +93,7 @@ export const cliArguments: Record<string, CliArg> = {
     type: 'string',
     short: 'T',
     [argname]: 'TEMPLATES',
-    [description]: 'Folder or module containing template overrides',
+    [description]: 'Folder or module containing template overrides (can be invoked multiple times)',
   },
   force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
   'no-index': { type: 'boolean', short: 'I', [description]: 'Skip auto-creating index files, only models' },
@@ -338,7 +338,13 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
 
               return {};
             }
+
             processTemplates = arg.inlineValue ? arg.value.slice(1) : arg.value;
+            const templates = await getTemplates(processTemplates);
+            if (templates === null) {
+              return {};
+            }
+            globalOptions.customTemplates = { ...globalOptions.customTemplates, ...templates };
           } else if (arg.name === 'output' || arg.name === 'root-ref') {
             if (!arg.value) {
               help(1, `Parameter '--${arg.name}' requires a value`);
@@ -413,13 +419,6 @@ export const cli = async (args: string[]): Promise<Record<string, GenerationTask
 
   if (globalOptions.output && globalOptions.output[0] !== '/') {
     globalOptions.output = relative('.', globalOptions.output);
-  }
-
-  if (processTemplates) {
-    const templates = await getTemplates(processTemplates);
-    if (templates !== null) {
-      globalOptions.customTemplates = templates;
-    }
   }
 
   if (!globalOptions['no-init']) {
