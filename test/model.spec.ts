@@ -63,8 +63,7 @@ describe('model.spec.ts', async () => {
           "picomatchOptions": {
             "bash": true
           },
-          "fancyPluralization": true,
-          "paths": {}
+          "fancyPluralization": true
         }
       `,
     );

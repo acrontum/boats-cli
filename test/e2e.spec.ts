@@ -29,8 +29,7 @@ describe('e2e.spec.ts', async () => {
         "picomatchOptions": {
           "bash": true
         },
-        "fancyPluralization": true,
-        "paths": {}
+        "fancyPluralization": true
       }
     `,
     );
@@ -865,8 +864,7 @@ describe('e2e.spec.ts', async () => {
           "picomatchOptions": {
             "bash": true
           },
-          "fancyPluralization": true,
-          "paths": {}
+          "fancyPluralization": true
         }
       `,
     );

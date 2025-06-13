@@ -1,6 +1,7 @@
-import { default as template } from 'boats/build/src/Template';
 import { default as bundlerSwaggerParse } from 'boats/build/src/bundlerSwaggerParse';
+import { default as getCheckCorrectBoatsRc } from 'boats/build/src/GetCheckCorrectBoatsRc';
 import { BoatsRC } from 'boats/build/src/interfaces/BoatsRc';
+import { default as template } from 'boats/build/src/Template';
 import { access, readFile } from 'fs/promises';
 import { dirname } from 'path';
 import pj from '../package.json';
@@ -88,6 +89,12 @@ export const boats = async (inFile: string, outFile: string, validate = true): P
   const con = mockConsoleLog();
 
   try {
+    // boats default tags are ignored
+    if (getCheckCorrectBoatsRc.defaultRc.nunjucksOptions && 'tags' in getCheckCorrectBoatsRc.defaultRc.nunjucksOptions) {
+      delete getCheckCorrectBoatsRc.defaultRc.nunjucksOptions.tags;
+    }
+    boatsRc = Object.assign(getCheckCorrectBoatsRc.defaultRc, boatsRc);
+
     const indexFile = template.directoryParse(inFile, outFile, null as unknown as number, trim, [], [], boatsRc, false);
     const outApiFile = await bundlerSwaggerParse({
       inputFile: indexFile,

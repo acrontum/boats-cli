@@ -57,7 +57,6 @@ export const getBoatsRc = (globalOptions: GlobalOptions, file: string): string =
           bash: true,
         },
         fancyPluralization: true,
-        paths: {},
       },
       null,
       2,
