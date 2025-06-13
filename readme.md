@@ -76,23 +76,30 @@ then you can just run `npx bc model test --dry-run`.
 
 ## Custom Generator Overrides
 
-You can override any of the generators by adding any of these files to a templates folder, and passing `--templates <folder>` to the cli:
-- boats-rc.js
-- component-index.js
-- create.js
-- delete.js
-- index.js
-- list.js
-- model.js
-- models.js
-- pagination-model.js
-- param.js
-- path-index.js
-- replace.js
-- show.js
-- update.js
+You can override any of the generators by adding any files or exports to the templates option (`--templates <folder_or_lib>`).
 
-Or, alternatively, exporting any of the following methods from a module (local file or node module):
+Boats cli will try to import from the folling:
+
+| file                | export             |
+|---------------------|--------------------|
+| boats-rc.js         | getBoatsRc         |
+| component-index.js  | getComponentIndex  |
+| create.js           | getCreate          |
+| delete.js           | getDelete          |
+| index.js            | getIndex           |
+| list.js             | getList            |
+| model.js            | getModel           |
+| models.js           | getModels          |
+| pagination-model.js | getPaginationModel |
+| param.js            | getParam           |
+| path-index.js       | getPathIndex       |
+| replace.js          | getReplace         |
+| show.js             | getShow            |
+| update.js           | getUpdate          |
+
+Multiple invocations of `-T, --templates` will merge / override the results of the templates, in the order supplied.
+
+A module export might look like:
 ```js
 exports.getBoatsRc = (opts, file) => { /* ... */ };
 exports.getIndex = (opts, file) => { /* ... */ };
@@ -110,7 +117,7 @@ exports.getUpdate = (opts, file) => { /* ... */ };
 exports.getReplace = (opts, file) => { /* ... */ };
 ```
 
-for example, `templates/index.js` or `exports.getList`:
+or overriding `path <name> --list`, a file `templates/list.js` or module with `exports.getList`:
 ```js
 // @ts-check
 const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
@@ -134,9 +141,10 @@ module.exports = (_globalOptions, file, pluralName, schemaRef, parameters) => {
   });
 };
 
+// or exports.getList = (_globalOptions, file, pluralName, schemaRef, parameters) => { ... }
 ````
 
-or disabling the default generator and instead creating 2 different files for models `templates/model.yml` or `exports.getModel`:
+or disabling the default generator and instead creating 2 different files for models (`templates/model.yml` or `exports.getModel`):
 ```js
 // @ts-check
 const { toYaml } = require('@acrontum/boats-cli/dist/src/lib');
