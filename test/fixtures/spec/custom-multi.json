@@ -1,0 +1,335 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "from src/paths/users/get.yml",
+        "description": "pluralName users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Users"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "create",
+        "description": "from src/paths/users/post.yml"
+      }
+    },
+    "/users/{userId}": {
+      "delete": {
+        "summary": "delete",
+        "description": "from src/paths/users/{userId}/delete.yml"
+      },
+      "get": {
+        "summary": "Show something, from src/paths/users/{userId}/get.yml",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update parts of a user",
+        "description": "from src/paths/users/{userId}/patch.yml",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PathUserId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Invalid user supplied"
+          }
+        }
+      },
+      "put": {
+        "summary": "upsert user",
+        "description": "from src/paths/users/{userId}/put.yml"
+      }
+    }
+  },
+  "info": {
+    "title": "from src/index.yml",
+    "version": "1.0"
+  },
+  "components": {
+    "parameters": {
+      "PathUserId": {
+        "in": "path",
+        "name": "userId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "path param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/pathUserId.yml"
+      },
+      "QueryLimit": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "query param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/queryLimit.yml"
+      },
+      "QueryOffset": {
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "description": "query param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/queryOffset.yml"
+      },
+      "QueryUserId": {
+        "in": "query",
+        "name": "userId",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "query param that does some stuff",
+        "example": "dont pass in a file, like this: src/components/parameters/queryUserId.yml"
+      }
+    },
+    "schemas": {
+      "Jwt": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "offset",
+          "limit",
+          "total"
+        ],
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Starting index"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Max items returned"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total items available"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "Users": {
+        "type": "object",
+        "required": [
+          "meta",
+          "data"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        }
+      },
+      "UserPatch": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserPost": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      },
+      "UserPut": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the thing, separated by dashes (-)",
+            "example": "this-is-an-example",
+            "minLength": 1,
+            "pattern": "\\S",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}
