@@ -30,6 +30,12 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/PathUserId"
+          },
+          {
+            "$ref": "#/components/parameters/QueryLimit"
+          },
+          {
+            "$ref": "#/components/parameters/QueryOffset"
           }
         ],
         "responses": {

@@ -357,6 +357,9 @@ describe('e2e.spec.ts', async () => {
       trimIndent`\
         summary: "List users"
         description: "List users"
+        parameters:
+          - $ref: "#/components/parameters/QueryLimit"
+          - $ref: "#/components/parameters/QueryOffset"
         responses:
           "200":
             description: "Success"
@@ -444,6 +447,8 @@ describe('e2e.spec.ts', async () => {
         description: "List photos"
         parameters:
           - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/QueryLimit"
+          - $ref: "#/components/parameters/QueryOffset"
         responses:
           "200":
             description: "Success"
@@ -606,6 +611,9 @@ describe('e2e.spec.ts', async () => {
       trimIndent`\
         summary: "List users"
         description: "List users"
+        parameters:
+          - $ref: "#/components/parameters/QueryLimit"
+          - $ref: "#/components/parameters/QueryOffset"
         responses:
           "200":
             description: "Success"
@@ -693,6 +701,8 @@ describe('e2e.spec.ts', async () => {
         description: "List photos"
         parameters:
           - $ref: "#/components/parameters/PathUserId"
+          - $ref: "#/components/parameters/QueryLimit"
+          - $ref: "#/components/parameters/QueryOffset"
         responses:
           "200":
             description: "Success"
@@ -1111,6 +1121,9 @@ describe('e2e.spec.ts', async () => {
       trimIndent`\
         summary: List users
         description: List users
+        parameters:
+          - $ref: ../../components/parameters/queryLimit.yml
+          - $ref: ../../components/parameters/queryOffset.yml
         responses:
           "200":
             description: Success
@@ -1203,6 +1216,8 @@ describe('e2e.spec.ts', async () => {
         description: List photos
         parameters:
           - $ref: ../../../../components/parameters/pathUserId.yml
+          - $ref: ../../../../components/parameters/queryLimit.yml
+          - $ref: ../../../../components/parameters/queryOffset.yml
         responses:
           "200":
             description: Success

@@ -1,5 +1,8 @@
 summary: "List users"
 description: "List users"
+parameters:
+  - $ref: "../../components/parameters/queryLimit.yml"
+  - $ref: "../../components/parameters/queryOffset.yml"
 responses:
   "200":
     description: "Success"

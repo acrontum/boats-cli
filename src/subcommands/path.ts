@@ -1,4 +1,4 @@
-import { dirname, relative } from 'path';
+import { dirname, join, relative } from 'path';
 import { CliArg, CliExit, GlobalOptions, SubcommandGenerator, buildHelpFromOpts, parseCliArgs } from '../cli';
 import { GenerationTask, logger } from '../generate';
 import { argname, camelCase, capitalize, dashCase, description, getRootRef, singular } from '../lib';
@@ -192,6 +192,11 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
       rootRef,
     );
     const paramRefs = mapParamRefs(otherPathParams, dirname(filename), rootRef);
+    const relativeParams = relative(`src/paths/${normalizedBaseFilepath}`, 'src/components/parameters/');
+    paramRefs.push(
+      { $ref: getRootRef(join(relativeParams, 'queryLimit.yml'), '#/components/parameters/QueryLimit', rootRef) },
+      { $ref: getRootRef(join(relativeParams, 'queryOffset.yml'), '#/components/parameters/QueryOffset', rootRef) },
+    );
 
     tasks.push(
       {
