@@ -27,6 +27,14 @@
         "summary": "List albums",
         "description": "List albums",
         "operationId": "albumsGet",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/QueryLimit"
+          },
+          {
+            "$ref": "#/components/parameters/QueryOffset"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -81,6 +89,12 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/PathAlbumId"
+          },
+          {
+            "$ref": "#/components/parameters/QueryLimit"
+          },
+          {
+            "$ref": "#/components/parameters/QueryOffset"
           }
         ],
         "responses": {

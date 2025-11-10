@@ -215,6 +215,9 @@ describe('path.spec.ts', async () => {
       trimIndent`\
         summary: "List users"
         description: "List users"
+        parameters:
+          - $ref: "../../components/parameters/queryLimit.yml"
+          - $ref: "../../components/parameters/queryOffset.yml"
         responses:
           "200":
             description: "Success"
@@ -490,6 +493,8 @@ describe('path.spec.ts', async () => {
         description: "List photos"
         parameters:
           - $ref: "../../../../components/parameters/pathUserId.yml"
+          - $ref: "../../../../components/parameters/queryLimit.yml"
+          - $ref: "../../../../components/parameters/queryOffset.yml"
         responses:
           "200":
             description: "Success"

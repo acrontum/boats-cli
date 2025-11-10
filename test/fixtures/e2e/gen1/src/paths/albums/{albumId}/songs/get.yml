@@ -2,6 +2,8 @@ summary: "List songs"
 description: "List songs"
 parameters:
   - $ref: "../../../../components/parameters/pathAlbumId.yml"
+  - $ref: "../../../../components/parameters/queryLimit.yml"
+  - $ref: "../../../../components/parameters/queryOffset.yml"
 responses:
   "200":
     description: "Success"

@@ -2,6 +2,8 @@ summary: "List addresses"
 description: "List addresses"
 parameters:
   - $ref: "../../../../components/parameters/pathUserId.yml"
+  - $ref: "../../../../components/parameters/queryLimit.yml"
+  - $ref: "../../../../components/parameters/queryOffset.yml"
 responses:
   "200":
     description: "Success"
