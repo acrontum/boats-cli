@@ -25,7 +25,10 @@ export const capitalize = (s: string): string => `${s[0].toUpperCase()}${s.slice
 
 // https://github.com/typeorm/typeorm/blob/master/src/util/StringUtils.ts
 export const camelCase = (str: string, firstCapital: boolean = false): string => {
-  return (firstCapital ? ' ' + str : str).replace(/^([A-Z])|[\s-_](\w)/g, (_, p1: string, p2?: string) => p2?.toUpperCase() || p1.toLowerCase());
+  return (firstCapital ? ' ' + str : str).replace(
+    /^([A-Z])|[\s-_](\w)/g,
+    (_, p1: string, p2?: string) => p2?.toUpperCase() || p1.toLowerCase(),
+  );
 };
 
 export const dashCase = (str: string): string => {
@@ -41,7 +44,7 @@ export const exists = (path: string): Promise<boolean> =>
     .then(() => true)
     .catch(() => false);
 
-export const mkdirp = async (path: string): Promise<string | undefined> => mkdir(path, { recursive: true });
+export const mkdirp = (path: string): Promise<string | undefined> => mkdir(path, { recursive: true });
 
 export const createFile = async (path: string, content: string, force = false): Promise<boolean> => {
   if (!force && (await exists(path))) {

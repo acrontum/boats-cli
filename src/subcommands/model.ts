@@ -4,36 +4,42 @@ import { argname, camelCase, capitalize, dashCase, description, getRootRef } fro
 import { getModel, getModels, getPaginationModel, getParam } from '../templates/model';
 
 type ModelGenerationOptions = {
-  name: string;
-  globalOptions: GlobalOptions;
+  'name': string;
+  'globalOptions': GlobalOptions;
   'no-model'?: boolean;
-  type?: 'query' | 'header' | 'path';
-  list?: boolean;
-  crud?: boolean;
-  get?: boolean;
-  delete?: boolean;
-  patch?: boolean;
-  post?: boolean;
-  put?: boolean;
+  'type'?: 'query' | 'header' | 'path';
+  'list'?: boolean;
+  'crud'?: boolean;
+  'get'?: boolean;
+  'delete'?: boolean;
+  'patch'?: boolean;
+  'post'?: boolean;
+  'put'?: boolean;
 };
 
 export const modelCliArguments: Record<string, CliArg> = {
-  'no-model': { type: 'boolean', short: 'm', [description]: 'Skip creating a model.yml file with CRUD operations (will create by default)' },
-  crud: { type: 'boolean', short: 'A', [description]: 'Short for -crudl' },
-  delete: { type: 'boolean', short: 'd', [description]: 'Create a delete.yml file' },
-  get: { type: 'boolean', short: 'r', [description]: 'Create a get.yml file' },
-  help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
-  list: { type: 'boolean', short: 'l', [description]: 'Create a models.yml file' },
-  name: { type: 'string', short: 'n', [description]: 'Model name (in case positional conflicts with parent commands)' },
-  patch: { type: 'boolean', short: 'u', [description]: 'Create a patch.yml file' },
-  post: { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
-  put: { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
-  quest: { type: 'boolean', [description]: 'Create a put.yml file' },
-  type: { type: 'string', [argname]: 'PARAM_TYPE', short: 't', [description]: 'Generate query, path, or header param' },
+  'no-model': {
+    type: 'boolean',
+    short: 'm',
+    [description]: 'Skip creating a model.yml file with CRUD operations (will create by default)',
+  },
+  'crud': { type: 'boolean', short: 'A', [description]: 'Short for -crudl' },
+  'delete': { type: 'boolean', short: 'd', [description]: 'Create a delete.yml file' },
+  'get': { type: 'boolean', short: 'r', [description]: 'Create a get.yml file' },
+  'help': { type: 'boolean', short: 'h', [description]: 'Show this menu' },
+  'list': { type: 'boolean', short: 'l', [description]: 'Create a models.yml file' },
+  'name': { type: 'string', short: 'n', [description]: 'Model name (in case positional conflicts with parent commands)' },
+  'patch': { type: 'boolean', short: 'u', [description]: 'Create a patch.yml file' },
+  'post': { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
+  'put': { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
+  'quest': { type: 'boolean', [description]: 'Create a put.yml file' },
+  'type': { type: 'string', [argname]: 'PARAM_TYPE', short: 't', [description]: 'Generate query, path, or header param' },
 };
 
 const help = (exitCode: number | null = null, message?: string): null => {
-  (exitCode === 0 ? logger.console.info.bind(logger.console) : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
+  (exitCode === 0
+    ? logger.console.info.bind(logger.console)
+    : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
 Generates BOATS model files.
 
 Usage:
@@ -119,11 +125,16 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
     generate: !options['no-model'] && !options.type,
   });
 
-  const paginationRef = getRootRef('../pagination/model.yml', '#/components/schemas/PaginationModel', options.globalOptions['root-ref']);
+  const paginationRef = getRootRef(
+    '../pagination/model.yml',
+    '#/components/schemas/PaginationModel',
+    options.globalOptions['root-ref'],
+  );
   if (options.type) {
     const filename = `src/components/parameters/${options.type}${capitalize(camelName)}.yml`;
     tasks.push({
-      contents: () => getParam(options.globalOptions, filename, options.name, options.type as Exclude<(typeof options)['type'], undefined>),
+      contents: () =>
+        getParam(options.globalOptions, filename, options.name, options.type as Exclude<(typeof options)['type'], undefined>),
       filename,
     });
   }
@@ -139,7 +150,8 @@ export const getModelTasks = (options: ModelGenerationOptions): GenerationTask[]
         filename: `src/components/parameters/queryLimit.yml`,
       },
       {
-        contents: () => getParam(options.globalOptions, `src/components/parameters/queryOffset.yml`, 'offset', 'query', 'integer'),
+        contents: () =>
+          getParam(options.globalOptions, `src/components/parameters/queryOffset.yml`, 'offset', 'query', 'integer'),
         filename: `src/components/parameters/queryOffset.yml`,
       },
       {

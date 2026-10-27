@@ -1,6 +1,6 @@
 {
-  /* https://github.com/tsconfig/bases/blob/main/bases/node22.json */
-  "extends": "@tsconfig/node22/tsconfig.json",
+  /* https://github.com/tsconfig/bases/blob/main/bases/node24.json */
+  "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
     "target": "es2024",
     "module": "NodeNext",
@@ -11,7 +11,6 @@
     "outDir": "./dist",
     "removeComments": false,
     "resolveJsonModule": true,
-    "rootDir": "./",
     "sourceMap": true,
     "strictNullChecks": true
   },

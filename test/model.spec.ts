@@ -29,7 +29,9 @@ describe('model.spec.ts', async () => {
       `,
     );
 
-    let files = await cli(toArgv('model user --post --list --get --delete --patch --put --output test/output/model --quiet --dry-run'));
+    let files = await cli(
+      toArgv('model user --post --list --get --delete --patch --put --output test/output/model --quiet --dry-run'),
+    );
     await assert.rejects(readdir('test/output/model'));
 
     files = await cli(toArgv('model user --post --list --get --delete --patch --put --output test/output/model --quiet'));
