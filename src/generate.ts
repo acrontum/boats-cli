@@ -49,13 +49,13 @@ const runTask = async (task: GenerationTask, options: GlobalOptions = {}): Promi
 
     if (!fileExists) {
       task.undo = async (): Promise<void> => {
-        await rm(createdFolder || filename, { recursive: true, force: true }).catch(() => null as unknown);
+        await rm(createdFolder || filename, { recursive: true, force: true }).catch(() => null);
         logger.console.warn('cleaned up', createdFolder ? createdFolder + '/' : filename);
       };
     } else if (options.force) {
       const previousContents = await readFile(filename, { encoding: 'utf8' });
       task.undo = async (): Promise<void> => {
-        await writeFile(filename, previousContents, { encoding: 'utf8' }).catch(() => null as unknown);
+        await writeFile(filename, previousContents, { encoding: 'utf8' }).catch(() => null);
         logger.console.warn('reverted changes in', filename);
       };
     }
@@ -82,7 +82,10 @@ export const generate = async (tasks: GenerationTask[], options: GlobalOptions =
       if (!options['no-index']) {
         if (task.filename.indexOf('src/components/schemas/') !== -1) {
           const filename = join(output, 'src/components/schemas/index.yml');
-          mapped[filename] ||= { contents: (): string => getComponentIndex(options, 'src/components/schemas/index.yml'), filename };
+          mapped[filename] ||= {
+            contents: (): string => getComponentIndex(options, 'src/components/schemas/index.yml'),
+            filename,
+          };
         } else if (task.filename.indexOf('src/components/parameters/') !== -1) {
           const filename = join(output, 'src/components/parameters/index.yml');
           mapped[filename] ||= {

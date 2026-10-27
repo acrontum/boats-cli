@@ -107,6 +107,14 @@ export const boats = async (inFile: string, outFile: string, validate = true): P
 
     (error as ErrorWithLogs).logs = con.logs;
 
-    return Promise.reject(error as Error);
+    if (error instanceof Error) {
+      return Promise.reject(error);
+    }
+    const err =
+      typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+        ? new Error(error.message)
+        : new Error('Boats failed');
+
+    return Promise.reject(err);
   }
 };

@@ -52,7 +52,14 @@ export const getCreate = (
   parameters?: { $ref: string }[],
 ): string => {
   if (typeof globalOptions.customTemplates?.getCreate === 'function') {
-    return globalOptions.customTemplates.getCreate(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+    return globalOptions.customTemplates.getCreate(
+      globalOptions,
+      file,
+      singularName,
+      requestSchemaRef,
+      responseSchemaRef,
+      parameters,
+    );
   }
 
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
@@ -124,7 +131,12 @@ export const getShow = (
   );
 };
 
-export const getDelete = (globalOptions: GlobalOptions, file: string, singularName: string, parameters?: { $ref: string }[]): string => {
+export const getDelete = (
+  globalOptions: GlobalOptions,
+  file: string,
+  singularName: string,
+  parameters?: { $ref: string }[],
+): string => {
   if (typeof globalOptions.customTemplates?.getDelete === 'function') {
     return globalOptions.customTemplates.getDelete(globalOptions, file, singularName, parameters);
   }
@@ -158,7 +170,14 @@ export const getUpdate = (
   parameters?: { $ref: string }[],
 ): string => {
   if (typeof globalOptions.customTemplates?.getUpdate === 'function') {
-    return globalOptions.customTemplates.getUpdate(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+    return globalOptions.customTemplates.getUpdate(
+      globalOptions,
+      file,
+      singularName,
+      requestSchemaRef,
+      responseSchemaRef,
+      parameters,
+    );
   }
 
   const spaceName = dashCase(singularName).replace(/-/g, ' ');
@@ -206,7 +225,14 @@ export const getReplace = (
   parameters?: { $ref: string }[],
 ): string => {
   if (typeof globalOptions.customTemplates?.getReplace === 'function') {
-    return globalOptions.customTemplates.getReplace(globalOptions, file, singularName, requestSchemaRef, responseSchemaRef, parameters);
+    return globalOptions.customTemplates.getReplace(
+      globalOptions,
+      file,
+      singularName,
+      requestSchemaRef,
+      responseSchemaRef,
+      parameters,
+    );
   }
 
   const spaceName = dashCase(singularName).replace(/-/g, ' ');

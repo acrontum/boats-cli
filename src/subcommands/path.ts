@@ -6,39 +6,50 @@ import { getModel, getModels, getPaginationModel, getParam } from '../templates/
 import { getCreate, getDelete, getList, getReplace, getShow, getUpdate } from '../templates/path';
 
 type PathGenerationOptions = {
-  name: string;
-  globalOptions: GlobalOptions;
+  'name': string;
+  'globalOptions': GlobalOptions;
   'no-models'?: boolean;
-  model?: string;
-  type?: string;
-  list?: boolean;
-  get?: boolean;
-  delete?: boolean;
-  patch?: boolean;
-  post?: boolean;
-  put?: boolean;
+  'model'?: string;
+  'type'?: string;
+  'list'?: boolean;
+  'get'?: boolean;
+  'delete'?: boolean;
+  'patch'?: boolean;
+  'post'?: boolean;
+  'put'?: boolean;
 };
 
 export const pathCliArguments: Record<string, CliArg> = {
-  list: { type: 'boolean', short: 'l', [description]: 'Create a models.yml file' },
-  get: { type: 'boolean', short: 'r', [description]: 'Create a get.yml file' },
-  delete: { type: 'boolean', short: 'd', [description]: 'Create a delete.yml file' },
-  patch: { type: 'boolean', short: 'u', [description]: 'Create a patch.yml file' },
-  put: { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
-  post: { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
-  name: { type: 'string', [argname]: 'NAME', short: 'n', [description]: 'Path name (in case positional conflicts with parent commands)' },
-  'no-models': { type: 'boolean', short: 'M', [description]: 'Skip creating any models, only the path file (will create by default)' },
-  model: {
+  'list': { type: 'boolean', short: 'l', [description]: 'Create a models.yml file' },
+  'get': { type: 'boolean', short: 'r', [description]: 'Create a get.yml file' },
+  'delete': { type: 'boolean', short: 'd', [description]: 'Create a delete.yml file' },
+  'patch': { type: 'boolean', short: 'u', [description]: 'Create a patch.yml file' },
+  'put': { type: 'boolean', short: 'P', [description]: 'Create a put.yml file' },
+  'post': { type: 'boolean', short: 'c', [description]: 'Create a post.yml file' },
+  'name': {
+    type: 'string',
+    [argname]: 'NAME',
+    short: 'n',
+    [description]: 'Path name (in case positional conflicts with parent commands)',
+  },
+  'no-models': {
+    type: 'boolean',
+    short: 'M',
+    [description]: 'Skip creating any models, only the path file (will create by default)',
+  },
+  'model': {
     type: 'string',
     [argname]: 'DASH_NAME',
     short: 'm',
     [description]: "Custom path model name (eg 'path /search/users --model=user-search')",
   },
-  help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
+  'help': { type: 'boolean', short: 'h', [description]: 'Show this menu' },
 };
 
 const help = (exitCode: number | null = null, message?: string): null => {
-  (exitCode === 0 ? logger.console.info.bind(logger.console) : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
+  (exitCode === 0
+    ? logger.console.info.bind(logger.console)
+    : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
 Generates BOATS path / method files (and model files by default).
 
 Usage:
@@ -117,7 +128,10 @@ export const parsePathCommand: SubcommandGenerator = (args: string[], globalOpti
   }
 
   if (parsed.positionals.length !== 1 && !parsed.values.name) {
-    return help(1, `path subcommand expects 1 positional argument for PATH, received ${parsed.positionals.length}\nargs:  ${args.join(' ')}`);
+    return help(
+      1,
+      `path subcommand expects 1 positional argument for PATH, received ${parsed.positionals.length}\nargs:  ${args.join(' ')}`,
+    );
   }
 
   const name = parsed.values.name?.toString() || parsed.positionals[0];
@@ -153,7 +167,8 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     if (pathParam) {
       lastIsParam = true;
       tasks.push({
-        contents: () => getParam(options.globalOptions, `src/components/parameters/path${capitalize(pathParam)}.yml`, pathParam, 'path'),
+        contents: () =>
+          getParam(options.globalOptions, `src/components/parameters/path${capitalize(pathParam)}.yml`, pathParam, 'path'),
         filename: `src/components/parameters/path${capitalize(pathParam)}.yml`,
         generate: !options['no-models'],
       });
@@ -188,7 +203,7 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
     const filename = `src/paths/${normalizedBaseFilepath}/get.yml`;
     const listSchemaRef = getRootRef(
       relative(`src/paths/${normalizedBaseFilepath}`, `src/components/schemas/${dashName}/models.yml`),
-      `#/components/schemas/${capitalize(singleModelName)}Models`,
+      `#/components/schemas/${capitalize(singularName)}Models`,
       rootRef,
     );
     const paramRefs = mapParamRefs(otherPathParams, dirname(filename), rootRef);
@@ -205,7 +220,8 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
         generate: !options['no-models'],
       },
       {
-        contents: () => getParam(options.globalOptions, 'src/components/parameters/queryOffset.yml', 'offset', 'query', 'integer'),
+        contents: () =>
+          getParam(options.globalOptions, 'src/components/parameters/queryOffset.yml', 'offset', 'query', 'integer'),
         filename: 'src/components/parameters/queryOffset.yml',
         generate: !options['no-models'],
       },
@@ -253,7 +269,10 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
         filename: `src/components/schemas/${dashName}/model.yml`,
         generate: !options['no-models'],
       },
-      { contents: () => getCreate(options.globalOptions, filename, singularName, postRequestRef, postResponseRef, paramRefs), filename },
+      {
+        contents: () => getCreate(options.globalOptions, filename, singularName, postRequestRef, postResponseRef, paramRefs),
+        filename,
+      },
     );
   }
 
@@ -308,7 +327,10 @@ export const getPathTasks = (options: PathGenerationOptions): GenerationTask[] =
         filename: `src/components/schemas/${dashName}/patch.yml`,
         generate: !options['no-models'],
       },
-      { contents: () => getUpdate(options.globalOptions, filename, singularName, postRequestRef, postResponseRef, paramRefs), filename },
+      {
+        contents: () => getUpdate(options.globalOptions, filename, singularName, postRequestRef, postResponseRef, paramRefs),
+        filename,
+      },
     );
   }
 
@@ -355,7 +377,11 @@ const extractPathParam = (part: string): string | null => {
   return null;
 };
 
-const mapParamRefs = (paramRefs: { rootRef: string; srcRef: string }[], pathLocation: string, rootRef?: string): { $ref: string }[] => {
+const mapParamRefs = (
+  paramRefs: { rootRef: string; srcRef: string }[],
+  pathLocation: string,
+  rootRef?: string,
+): { $ref: string }[] => {
   if (!paramRefs.length) {
     return [];
   }

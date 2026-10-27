@@ -38,7 +38,11 @@ export const getModel = (globalOptions: GlobalOptions, file: string): string => 
   );
 };
 
-export const getModels = (globalOptions: GlobalOptions, file: string, paginationRef: string = '../pagination/model.yml'): string => {
+export const getModels = (
+  globalOptions: GlobalOptions,
+  file: string,
+  paginationRef: string = '../pagination/model.yml',
+): string => {
   if (typeof globalOptions.customTemplates?.getModels === 'function') {
     return globalOptions.customTemplates.getModels(globalOptions, file, paginationRef);
   }

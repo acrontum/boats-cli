@@ -16,15 +16,15 @@ export type ParseArgsOptionConfig = NonNullable<ParseArgsConfig['options']>[stri
 export type CliArg = ParseArgsOptionConfig & { [description]: string; [argname]?: string };
 export type GlobalOptions = {
   'dry-run'?: boolean;
-  force?: boolean;
+  'force'?: boolean;
   'no-index'?: boolean;
   'no-init'?: boolean;
   'no-quote'?: boolean;
-  output?: string;
-  quiet?: boolean;
-  verbose?: boolean;
+  'output'?: string;
+  'quiet'?: boolean;
+  'verbose'?: boolean;
   'root-ref'?: string;
-  customTemplates?: {
+  'customTemplates'?: {
     getBoatsRc?: typeof getBoatsRc;
     getIndex?: typeof getIndex;
 
@@ -89,13 +89,13 @@ export const cliArguments: Record<string, CliArg> = {
   create.js  delete.js  list.js  model.js  models.js  pagination.js  param.js  replace.js  show.js  update.js
   */
   'dry-run': { type: 'boolean', short: 'D', [description]: 'Print the changes to be made' },
-  templates: {
+  'templates': {
     type: 'string',
     short: 'T',
     [argname]: 'TEMPLATES',
     [description]: 'Folder or module containing template overrides (can be invoked multiple times)',
   },
-  force: { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
+  'force': { type: 'boolean', short: 'f', [description]: 'Overwrite existing files' },
   'no-index': { type: 'boolean', short: 'I', [description]: 'Skip auto-creating index files, only models' },
   'no-init': { type: 'boolean', short: 'N', [description]: 'Skip auto-creating init files' },
   'no-quote': {
@@ -104,9 +104,14 @@ export const cliArguments: Record<string, CliArg> = {
     [description]:
       'Remove quotes around string values. Note that this is not guaranteed to output a valid value as YAML string rules are non-trivial, so use at your own discretion.',
   },
-  output: { type: 'string', short: 'o', [argname]: 'OUTPUT_DIR', [description]: 'Location to output files to (defaults to current folder)' },
-  quiet: { type: 'boolean', short: 'q', [description]: 'Only output errors' },
-  verbose: { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
+  'output': {
+    type: 'string',
+    short: 'o',
+    [argname]: 'OUTPUT_DIR',
+    [description]: 'Location to output files to (defaults to current folder)',
+  },
+  'quiet': { type: 'boolean', short: 'q', [description]: 'Only output errors' },
+  'verbose': { type: 'boolean', short: 'v', [description]: 'Print the contents of the files to be generated' },
   'root-ref': {
     type: 'string',
     short: 'R',
@@ -116,7 +121,7 @@ export const cliArguments: Record<string, CliArg> = {
       "TRIM should match autoComponentIndexer (usually 'Model'). " +
       "If TRIM is '-' then '' is passed to indexer",
   },
-  help: { type: 'boolean', short: 'h', [description]: 'Show this menu' },
+  'help': { type: 'boolean', short: 'h', [description]: 'Show this menu' },
 };
 
 export const buildHelpFromOpts = (opts: Record<string, CliArg>): string => {
@@ -147,7 +152,9 @@ export const buildHelpFromOpts = (opts: Record<string, CliArg>): string => {
 };
 
 const help = (exitCode: number | null = null, message?: string): null => {
-  (exitCode === 0 ? logger.console.log.bind(logger.console) : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
+  (exitCode === 0
+    ? logger.console.log.bind(logger.console)
+    : logger.console.error.bind(logger.console))(`${message ? message + '\n\n' : ''}\
 Generates boilerplate BOATS files.
 
 Usage:

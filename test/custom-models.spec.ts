@@ -48,7 +48,8 @@ describe('custom-models.spec.ts', async () => {
     const files = await generate(
       [
         {
-          contents: (): string => getModels(globalOptions, `src/components/schemas/something/models.yml`, '#/components/schemas/Pagination'),
+          contents: (): string =>
+            getModels(globalOptions, `src/components/schemas/something/models.yml`, '#/components/schemas/Pagination'),
           filename: `src/components/schemas/something/models.yml`,
         },
         {
@@ -73,7 +74,10 @@ describe('custom-models.spec.ts', async () => {
           'test/output/custom/src/components/schemas/something/model.yml',
           { filename: 'test/output/custom/src/components/schemas/something/model.yml', skipped: true },
         ],
-        ['test/output/custom/src/components/schemas/index.yml', { filename: 'test/output/custom/src/components/schemas/index.yml' }],
+        [
+          'test/output/custom/src/components/schemas/index.yml',
+          { filename: 'test/output/custom/src/components/schemas/index.yml' },
+        ],
         ['test/output/custom/.boatsrc', { filename: 'test/output/custom/.boatsrc' }],
       ]),
     );
@@ -153,7 +157,10 @@ describe('custom-models.spec.ts', async () => {
     log.unmock();
 
     assert.strictEqual(error instanceof CliExit, true);
-    assert.deepStrictEqual(log.logs, [['cannot load templates "test/fixtures/spec": template folder has no override files\n'], log.logs[1]]);
+    assert.deepStrictEqual(log.logs, [
+      ['cannot load templates "test/fixtures/spec": template folder has no override files\n'],
+      log.logs[1],
+    ]);
 
     log = mockConsoleLog();
     error = await cli(
